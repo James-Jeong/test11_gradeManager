@@ -18,7 +18,7 @@ static int gradeManagerSetGradeInfo(gradeManager_t *gradeManager, char grade, in
  * @fn static void gradeInfoSetData(gradeInfo_t *info, char grade, int min, int max)
  * @brief 등급에 대한 정보를 저장하는 함수
  * @param info 등급에 대한 정보를 저장할 gradeInfo_t 객체(출력)
- * @param grade 정보를 저장할 등급 문자(입력)
+ * @param grade 정보를 저장할 등급 이름(입력)
  * @param min 지정한 점수에 대한 등급을 판단하기 위한 범위 최소값(입력)
  * @param max 지정한 점수에 대한 등급을 판단하기 위한 범위 최대값(입력)
  * @return 반환값 없음
@@ -37,7 +37,7 @@ static void gradeInfoSetData(gradeInfo_t *info, char grade, int min, int max)
 }
 
 //////////////////////////////////////////////////////////////////////////
-/// Public Functions for gradeManager_t
+/// Local Functions for gradeManager_t
 //////////////////////////////////////////////////////////////////////////
 
 /**
@@ -129,80 +129,9 @@ void gradeManagerEvaluateGrade(gradeManager_t *gradeManager, const int *scores, 
 //////////////////////////////////////////////////////////////////////////
 
 /**
- * @fn static char gradeManagerGetGradeFromNumber(gradeManager_t *gradeManager, int score)
- * @brief 지정한 점수로 등급을 결정하는 함수
- * @param gradeManager 등급에 대한 정보를 관리하는 구조체(입력)
- * @param score 등급 판단에 사용될 점수(입력)
- * @return 성공 시 결정된 등급 문자, 실패 시 'F' 문자, 지정한 점수가 등급 전체 범위에 없을 때 '?' 문자 반환
- */
-static char gradeManagerGetGradeFromNumber(gradeManager_t *gradeManager, int score)
-{
-	if(score < gradeManager->totalMin || score > gradeManager->totalMax)
-	{
-		printf("\n[ERROR] 입력받은 점수에 대한 등급을 판단할 수 없음 .\n");
-		return '?';
-	}
-
-	if(gradeManagerCheckGrade(gradeManager, 'A', score) == TRUE) return 'A';
-	else if(gradeManagerCheckGrade(gradeManager, 'B', score) == TRUE) return 'B';
-	else if(gradeManagerCheckGrade(gradeManager, 'C', score) == TRUE) return 'C';
-	else if(gradeManagerCheckGrade(gradeManager, 'D', score) == TRUE) return 'D';
-
-	return 'F';
-}
-
-/**
- * @fn static int gradeManagerCheckGrade(gradeManager_t *gradeManager, char grade, int score)
- * @brief 지정한 점수에 대해 등급을 판단하는 함수
- * @param gradeManager 등급에 대한 정보를 관리하는 구조체(입력)
- * @param grade 판단할 등급 문자(입력)
- * @param score 등급 판단에 사용될 점수(입력)
- * @return 성공 시 TRUE, 실패 시 FALSE 반환
- */
-static int gradeManagerCheckGrade(gradeManager_t *gradeManager, char grade, int score)
-{
-	gradeInfo_t *gradeInfo = gradeManagerGetInfoFromGrade(gradeManager, grade);
-	if(gradeInfo == NULL)
-	{
-		printf("[DEBUG] 입력받은 등급에 대한 정보(min, max)가 없음.\n");
-		return FALSE;
-	}
-	return ((score >= gradeInfo->min) && (score <= gradeInfo->max)) ? TRUE : FALSE;
-}
-
-/**
- * @fn static gradeInfo_t* gradeManagerGetInfoFromGrade(gradeManager_t *gradeManager, char grade)
- * @brief 등급에 대한 정보를 가지고 있는 구조체(gradeInfo_t)를 반환하기 위한 함수
- * @param gradeManager 등급에 대한 정보를 관리하는 구조체(입력)
- * @param grade 반환 시 식별에 필요한 등급 문자(입력)
- * @return 성공 시 gradeInfo_t 구조체의 주소, 실패 시 NULL 반환
- */
-static gradeInfo_t* gradeManagerGetInfoFromGrade(gradeManager_t *gradeManager, char grade)
-{
-	if(gradeManager->gradeA.grade == grade)
-	{
-		return &(gradeManager->gradeA);
-	}
-	else if(gradeManager->gradeB.grade == grade)
-	{
-		return &(gradeManager->gradeB);
-	}
-	else if(gradeManager->gradeC.grade == grade)
-	{
-		return &(gradeManager->gradeC);
-	}
-	else if(gradeManager->gradeD.grade == grade)
-	{
-		return &(gradeManager->gradeD);
-	}
-
-	return NULL;
-}
-
-/**
  * @fn static int gradeManagerLoadINI(gradeManager_t *gradeManager, const char *fileName)
- * @brief ini 파일에 대한 정보를 gradeManager 구조체에 저장하는 함수
- * @param gradeManager 등급에 대한 정보를 관리하는 구조체(입력 및 출력)
+ * @brief ini 파일에 대한 정보를 gradeManager 구조체에 로드하는 함수
+ * @param gradeManager 등급에 대한 정보를 관리하는 구조체(입력)
  * @param fileName ini 파일 이름(입력, 읽기 전용)
  * @return 성공 시 SUCCESS, 실패 시 FAIL 반환
  */
@@ -267,8 +196,8 @@ static int gradeManagerLoadINI(gradeManager_t *gradeManager, const char *fileNam
 /**
  * @fn static int gradeManagerSetGradeInfo(gradeManager_t *gradeManager, char grade, int min, int max)
  * @brief 등급에 대한 정보를 gradeManager 에 저장하기 위한 함수
- * @param gradeManager 등급에 대한 정보를 저장할 구조체(출력)
- * @param grade 정보를 저장할 등급 문자(입력)
+ * @param gradeManager 등급에 대한 정보를 관리하는 구조체(입력)
+ * @param grade 정보를 저장할 등급 이름(입력)
  * @param min 지정한 점수에 대한 등급을 판단하기 위한 범위 최소값(입력)
  * @param max 지정한 점수에 대한 등급을 판단하기 위한 범위 최대값(입력)
  * @return 성공 시 SUCCESS, 실패 시 FAIL 반환
@@ -294,5 +223,54 @@ static int gradeManagerSetGradeInfo(gradeManager_t *gradeManager, char grade, in
 	}
 
 	return SUCCESS;
+}
+
+static int gradeManagerCheckGrade(gradeManager_t *gradeManager, char grade, int score)
+{
+	gradeInfo_t *gradeInfo = gradeManagerGetInfoFromGrade(gradeManager, grade);
+	if(gradeInfo == NULL)
+	{
+		printf("[DEBUG] 입력받은 등급에 대한 정보(min, max)가 없음.\n");
+		return FALSE;
+	}
+	return ((score >= gradeInfo->min) && (score <= gradeInfo->max)) ? TRUE : FALSE;
+}
+
+static char gradeManagerGetGradeFromNumber(gradeManager_t *gradeManager, int score)
+{
+	if(score < gradeManager->totalMin || score > gradeManager->totalMax)
+	{
+		printf("\n[ERROR] 입력받은 점수에 대한 등급을 판단할 수 없음 .\n");
+		return '?';
+	}
+
+	if(gradeManagerCheckGrade(gradeManager, 'A', score) == TRUE) return 'A';
+	else if(gradeManagerCheckGrade(gradeManager, 'B', score) == TRUE) return 'B';
+	else if(gradeManagerCheckGrade(gradeManager, 'C', score) == TRUE) return 'C';
+	else if(gradeManagerCheckGrade(gradeManager, 'D', score) == TRUE) return 'D';
+
+	return 'F';
+}
+
+static gradeInfo_t* gradeManagerGetInfoFromGrade(gradeManager_t *gradeManager, char grade)
+{
+	if(gradeManager->gradeA.grade == grade)
+	{
+		return &(gradeManager->gradeA);
+	}
+	else if(gradeManager->gradeB.grade == grade)
+	{
+		return &(gradeManager->gradeB);
+	}
+	else if(gradeManager->gradeC.grade == grade)
+	{
+		return &(gradeManager->gradeC);
+	}
+	else if(gradeManager->gradeD.grade == grade)
+	{
+		return &(gradeManager->gradeD);
+	}
+
+	return NULL;
 }
 
