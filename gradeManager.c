@@ -109,41 +109,43 @@ static int gradeManagerLoadINI(gradeManager_t *gradeManager, const char *fileNam
 	}
 
 	printf("\n[Load values from the field list to variables]\n");
-	int totalMin = iniManagerGetValueFromINI(gradeManager->iniManager, "[Total]", "min", 0, fileName);
+	iniManager_t *iniManager = gradeManager->iniManager;
+
+	int totalMin = iniManagerGetValueFromField(iniManager, "[Total]", "min", 0, fileName);
 	if(totalMin == FAIL) return FAIL;
 	printf("Total min value : %d\n", totalMin);
-	int totalMax = iniManagerGetValueFromINI(gradeManager->iniManager, "[Total]", "max", 0, fileName);
+	int totalMax = iniManagerGetValueFromField(iniManager, "[Total]", "max", 0, fileName);
 	if(totalMax == FAIL) return FAIL;
 	printf("Total max value : %d\n", totalMax);
 
 	gradeManager->totalMin = totalMin;
 	gradeManager->totalMax = totalMax;
 
-	int minA = iniManagerGetValueFromINI(gradeManager->iniManager, "[A]", "min", 0, fileName);
+	int minA = iniManagerGetValueFromField(iniManager, "[A]", "min", 0, fileName);
 	if(minA == FAIL) return FAIL;
 	printf("Grade A min value : %d\n", minA);
-	int maxA = iniManagerGetValueFromINI(gradeManager->iniManager, "[A]", "max", 0, fileName);
+	int maxA = iniManagerGetValueFromField(iniManager, "[A]", "max", 0, fileName);
 	if(maxA == FAIL) return FAIL;
 	printf("Grade A max value : %d\n", maxA);
 
-	int minB = iniManagerGetValueFromINI(gradeManager->iniManager, "[B]", "min", 0, fileName);
+	int minB = iniManagerGetValueFromField(iniManager, "[B]", "min", 0, fileName);
 	if(minB == FAIL) return FAIL;
 	printf("Grade B min value : %d\n", minB);
-	int maxB = iniManagerGetValueFromINI(gradeManager->iniManager, "[B]", "max", 0, fileName);
+	int maxB = iniManagerGetValueFromField(iniManager, "[B]", "max", 0, fileName);
 	if(maxB == FAIL) return FAIL;
 	printf("Grade B max value : %d\n", maxB);
 
-	int minC = iniManagerGetValueFromINI(gradeManager->iniManager, "[C]", "min", 0, fileName);
+	int minC = iniManagerGetValueFromField(iniManager, "[C]", "min", 0, fileName);
 	if(minC == FAIL) return FAIL;
 	printf("Grade C min value : %d\n", minC);
-	int maxC = iniManagerGetValueFromINI(gradeManager->iniManager, "[C]", "max", 0, fileName);
+	int maxC = iniManagerGetValueFromField(iniManager, "[C]", "max", 0, fileName);
 	if(maxC == FAIL) return FAIL;
 	printf("Grade C max value : %d\n", maxC);
 
-	int minD = iniManagerGetValueFromINI(gradeManager->iniManager, "[D]", "min", 0, fileName);
+	int minD = iniManagerGetValueFromField(iniManager, "[D]", "min", 0, fileName);
 	if(minD == FAIL) return FAIL;
 	printf("Grade D min value : %d\n", minD);
-	int maxD = iniManagerGetValueFromINI(gradeManager->iniManager, "[D]", "max", 0, fileName);
+	int maxD = iniManagerGetValueFromField(iniManager, "[D]", "max", 0, fileName);
 	if(maxD == FAIL) return FAIL;
 	printf("Grade D max value : %d\n", maxD);
 

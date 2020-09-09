@@ -1,4 +1,4 @@
-#include "iniParser.h"
+#include "iniManager.h"
 
 //////////////////////////////////////////////////////////////////////////
 /// Predefinitions of Static Functions
@@ -48,7 +48,7 @@ void iniManagerDelete(iniManager_t **iniManager)
 	*iniManager = NULL;
 }
 
-int iniManagerGetValueFromINI(iniManager_t *iniManager, const char *field, const char *key, int defaultValue, const char *fileName)
+int iniManagerGetValueFromField(iniManager_t *iniManager, const char *field, const char *key, int defaultValue, const char *fileName)
 {
 	if(iniManagerFindFieldFromList(iniManager, field) == FAIL)
 	{
@@ -103,15 +103,15 @@ static int iniManagerGetFieldListfromINI(char fieldList[][MAX_FIELD_LEN], const 
 		return FAIL;
 	}
 
-	int keyIndex = 0;
+	int fieldIndex = 0;
 	char fieldFindBuffer[MAX_FIELD_LEN] = { '\0' };
 
 	while(fgets(fieldFindBuffer, MAX_FIELD_LEN, filePtr) != NULL)
 	{
 		if(strchr(fieldFindBuffer, '[') != NULL)
 		{
-			memcpy(fieldList[keyIndex], fieldFindBuffer, strlen(fieldFindBuffer) - 1);
-			keyIndex++;
+			memcpy(fieldList[fieldIndex], fieldFindBuffer, strlen(fieldFindBuffer) - 1);
+			fieldIndex++;
 		}
 	}
 

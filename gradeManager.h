@@ -1,7 +1,7 @@
 #ifndef __GRADE_LIMIT_H__
 #define __GRADE_LIMIT_H__
 
-#include "iniParser.h"
+#include "iniManager.h"
 
 //////////////////////////////////////////////////////////////////////////
 /// Definitions & Macros

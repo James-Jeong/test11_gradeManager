@@ -20,6 +20,6 @@ struct iniManager_s
 iniManager_t *iniManagerNew(const char *fileName);
 void iniManagerDelete(iniManager_t **iniManager);
 
-int iniManagerGetValueFromINI(iniManager_t *iniManager, const char *field, const char *key, int defaultValue, const char *fileName);
+int iniManagerGetValueFromField(iniManager_t *iniManager, const char *field, const char *key, int defaultValue, const char *fileName);
 
 #endif // #ifndef __INI_PARSER_H__
