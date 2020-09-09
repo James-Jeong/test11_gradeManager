@@ -21,10 +21,10 @@ struct gradeInfo_s
 typedef struct gradeManager_s gradeManager_t;
 struct gradeManager_s
 {
-	gradeInfo_t limitOfA;
-	gradeInfo_t limitOfB;
-	gradeInfo_t limitOfC;
-	gradeInfo_t limitOfD;
+	gradeInfo_t gradeA;
+	gradeInfo_t gradeB;
+	gradeInfo_t gradeC;
+	gradeInfo_t gradeD;
 	int totalMin;
 	int totalMax;
 	iniManager_t *iniManager;
@@ -35,7 +35,7 @@ struct gradeManager_s
 //////////////////////////////////////////////////////////////////////////
 
 gradeManager_t* gradeManagerNew();
-void gradeManagerDelete(gradeManager_t **limit);
-void evaluateGrade(gradeManager_t *limit, const int *scores, int size);
+void gradeManagerDelete(gradeManager_t **manager);
+void gradeManagerEvaluateGrade(gradeManager_t *manager, const int *scores, int size);
 
 #endif // #ifndef __GRADE_LIMIT_H__

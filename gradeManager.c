@@ -4,31 +4,11 @@
 /// Predefinitions of Static Functions
 //////////////////////////////////////////////////////////////////////////
 
-static int gradeManagerCheckGrade(gradeManager_t *limit, char grade, int score);
-static char gradeManagerGetGradeFromNumber(gradeManager_t *limit, int score);
-static gradeInfo_t* gradeManagerGetLimitFromGrade(gradeManager_t *limit, char grade);
-static int gradeManagerLoadINI(gradeManager_t *limit, const char *fileName);
-static void gradeManagerSetGradeLimit(gradeManager_t *limit, char grade, int min, int max);
-
-//////////////////////////////////////////////////////////////////////////
-/// Public Function
-//////////////////////////////////////////////////////////////////////////
-
-void evaluateGrade(gradeManager_t *limit, const int *scores, int size)
-{
-	if(scores == NULL)
-	{
-		printf("[DEBUG] 입력받은 점수 목록이 NULL.\n");
-		return;
-	}
-
-	int numPos = 0;
-
-	for( ; numPos < size; numPos++)	
-	{
-		printf("%d -> %c\n", scores[numPos], gradeManagerGetGradeFromNumber(limit, scores[numPos]));
-	}
-}
+static int gradeManagerCheckGrade(gradeManager_t *gradeManager, char grade, int score);
+static char gradeManagerGetGradeFromNumber(gradeManager_t *gradeManager, int score);
+static gradeInfo_t* gradeManagerGetInfoFromGrade(gradeManager_t *gradeManager, char grade);
+static int gradeManagerLoadINI(gradeManager_t *gradeManager, const char *fileName);
+static int gradeManagerSetGradeInfo(gradeManager_t *gradeManager, char grade, int min, int max);
 
 //////////////////////////////////////////////////////////////////////////
 /// Static Function for gradeInfo_t
@@ -36,6 +16,12 @@ void evaluateGrade(gradeManager_t *limit, const int *scores, int size)
 
 static void gradeInfoSetData(gradeInfo_t *info, char grade, int min, int max)
 {
+	if(info == NULL)
+	{
+		printf("[DEBUG] gradeInfo 가 NULL. (info:%p)\n", info);
+		return;
+	}
+
 	info->grade = grade;
 	info->min = min;
 	info->max = max;
@@ -47,113 +33,155 @@ static void gradeInfoSetData(gradeInfo_t *info, char grade, int min, int max)
 
 gradeManager_t* gradeManagerNew()
 {
-	gradeManager_t *limit = (gradeManager_t*)malloc(sizeof(gradeManager_t));
-	if(limit == NULL)
+	gradeManager_t *gradeManager = (gradeManager_t*)malloc(sizeof(gradeManager_t));
+	if(gradeManager == NULL)
 	{
 		printf("[DEBUG] 등급 임계치 객체 동적 생성 실패. NULL.\n");
 		return NULL;
 	}
 
-	limit->iniManager = iniManagerNew("./grade.ini");
-	if(limit->iniManager == NULL)
+	gradeManager->iniManager = iniManagerNew("./grade.ini");
+	if(gradeManager->iniManager == NULL)
 	{
+		free(gradeManager);
 		return NULL;
 	}
 
-	if(gradeManagerLoadINI(limit, "./grade.ini") == FAIL)
+	if(gradeManagerLoadINI(gradeManager, "./grade.ini") == FAIL)
 	{
-		gradeManagerDelete(&limit);
+		gradeManagerDelete(&gradeManager);
 		return NULL;
 	}
 
-	return limit;
+	return gradeManager;
 }
 
-void gradeManagerDelete(gradeManager_t **limit)
+void gradeManagerDelete(gradeManager_t **gradeManager)
 {
-	iniManagerDelete(&((*limit)->iniManager));
-	free(*limit);
-	*limit = NULL;
+	if(*gradeManager == NULL)
+	{
+		printf("[DEBUG] gradeManager 해제 실패. 객체가 NULL. (gradeManager:%p)\n", *gradeManager);
+		return;
+	}
+
+	iniManagerDelete(&((*gradeManager)->iniManager));
+	free(*gradeManager);
+	*gradeManager = NULL;
 }
 
+void gradeManagerEvaluateGrade(gradeManager_t *gradeManager, const int *scores, int size)
+{
+	if(gradeManager == NULL)
+	{
+		printf("[DEBUG] gradeManager 가 NULL. (gradeManager:%p)\n", gradeManager);
+		return;
+	}
+
+	if(scores == NULL)
+	{
+		printf("[DEBUG] 입력받은 점수 목록이 NULL. (scores:%p)\n", scores);
+		return;
+	}
+
+	if(size <= 0)
+	{
+		printf("[ERROR] 입력받은 점수 목록의 크기가 0 보다 작거나 같음. (size:%d)\n", size);
+		return;
+	}
+
+	int numPos = 0;
+	for( ; numPos < size; numPos++)	
+	{
+		printf("%d -> %c\n", scores[numPos], gradeManagerGetGradeFromNumber(gradeManager, scores[numPos]));
+	}
+}
 
 //////////////////////////////////////////////////////////////////////////
 /// Static Functions for gradeManager_t
 //////////////////////////////////////////////////////////////////////////
 
-static int gradeManagerLoadINI(gradeManager_t *limit, const char *fileName)
+static int gradeManagerLoadINI(gradeManager_t *gradeManager, const char *fileName)
 {
+	if(fileName == NULL)
+	{
+		printf("[DEBUG] 주어진 fileName 이 NULL. (fileName:%p)\n", fileName);
+		return FAIL;
+	}
+
 	printf("\n[Load values from the field list to variables]\n");
-	int totalMin = iniManagerGetValueFromINI(limit->iniManager, "[Total]", "min", 0, fileName);
+	int totalMin = iniManagerGetValueFromINI(gradeManager->iniManager, "[Total]", "min", 0, fileName);
 	if(totalMin == FAIL) return FAIL;
 	printf("Total min value : %d\n", totalMin);
-	int totalMax = iniManagerGetValueFromINI(limit->iniManager, "[Total]", "max", 0, fileName);
+	int totalMax = iniManagerGetValueFromINI(gradeManager->iniManager, "[Total]", "max", 0, fileName);
 	if(totalMax == FAIL) return FAIL;
 	printf("Total max value : %d\n", totalMax);
 
-	limit->totalMin = totalMin;
-	limit->totalMax = totalMax;
+	gradeManager->totalMin = totalMin;
+	gradeManager->totalMax = totalMax;
 
-	int minA = iniManagerGetValueFromINI(limit->iniManager, "[A]", "min", 0, fileName);
+	int minA = iniManagerGetValueFromINI(gradeManager->iniManager, "[A]", "min", 0, fileName);
 	if(minA == FAIL) return FAIL;
 	printf("Grade A min value : %d\n", minA);
-	int maxA = iniManagerGetValueFromINI(limit->iniManager, "[A]", "max", 0, fileName);
+	int maxA = iniManagerGetValueFromINI(gradeManager->iniManager, "[A]", "max", 0, fileName);
 	if(maxA == FAIL) return FAIL;
 	printf("Grade A max value : %d\n", maxA);
 
-	int minB = iniManagerGetValueFromINI(limit->iniManager, "[B]", "min", 0, fileName);
+	int minB = iniManagerGetValueFromINI(gradeManager->iniManager, "[B]", "min", 0, fileName);
 	if(minB == FAIL) return FAIL;
 	printf("Grade B min value : %d\n", minB);
-	int maxB = iniManagerGetValueFromINI(limit->iniManager, "[B]", "max", 0, fileName);
+	int maxB = iniManagerGetValueFromINI(gradeManager->iniManager, "[B]", "max", 0, fileName);
 	if(maxB == FAIL) return FAIL;
 	printf("Grade B max value : %d\n", maxB);
 
-	int minC = iniManagerGetValueFromINI(limit->iniManager, "[C]", "min", 0, fileName);
+	int minC = iniManagerGetValueFromINI(gradeManager->iniManager, "[C]", "min", 0, fileName);
 	if(minC == FAIL) return FAIL;
 	printf("Grade C min value : %d\n", minC);
-	int maxC = iniManagerGetValueFromINI(limit->iniManager, "[C]", "max", 0, fileName);
+	int maxC = iniManagerGetValueFromINI(gradeManager->iniManager, "[C]", "max", 0, fileName);
 	if(maxC == FAIL) return FAIL;
 	printf("Grade C max value : %d\n", maxC);
 
-	int minD = iniManagerGetValueFromINI(limit->iniManager, "[D]", "min", 0, fileName);
+	int minD = iniManagerGetValueFromINI(gradeManager->iniManager, "[D]", "min", 0, fileName);
 	if(minD == FAIL) return FAIL;
 	printf("Grade D min value : %d\n", minD);
-	int maxD = iniManagerGetValueFromINI(limit->iniManager, "[D]", "max", 0, fileName);
+	int maxD = iniManagerGetValueFromINI(gradeManager->iniManager, "[D]", "max", 0, fileName);
 	if(maxD == FAIL) return FAIL;
 	printf("Grade D max value : %d\n", maxD);
 
-	gradeManagerSetGradeLimit(limit, 'A', minA, maxA);
-	gradeManagerSetGradeLimit(limit, 'B', minB, maxB);
-	gradeManagerSetGradeLimit(limit, 'C', minC, maxC);
-	gradeManagerSetGradeLimit(limit, 'D', minD, maxD);
+	if(gradeManagerSetGradeInfo(gradeManager, 'A', minA, maxA) == FAIL) return FAIL;
+	if(gradeManagerSetGradeInfo(gradeManager, 'B', minB, maxB) == FAIL) return FAIL;
+	if(gradeManagerSetGradeInfo(gradeManager, 'C', minC, maxC) == FAIL) return FAIL;
+	if(gradeManagerSetGradeInfo(gradeManager, 'D', minD, maxD) == FAIL) return FAIL;
 
+	printf("\n");
 	return SUCCESS;
 }
 
-static void gradeManagerSetGradeLimit(gradeManager_t *limit, char grade, int min, int max)
+static int gradeManagerSetGradeInfo(gradeManager_t *gradeManager, char grade, int min, int max)
 {
 	switch(grade)
 	{
 		case 'A':
-			gradeInfoSetData(&limit->limitOfA, grade, min, max);
+			gradeInfoSetData(&gradeManager->gradeA, grade, min, max);
 			break;
 		case 'B':
-			gradeInfoSetData(&limit->limitOfB, grade, min, max);
+			gradeInfoSetData(&gradeManager->gradeB, grade, min, max);
 			break;
 		case 'C':
-			gradeInfoSetData(&limit->limitOfC, grade, min, max);
+			gradeInfoSetData(&gradeManager->gradeC, grade, min, max);
 			break;
 		case 'D':
-			gradeInfoSetData(&limit->limitOfD, grade, min, max);
+			gradeInfoSetData(&gradeManager->gradeD, grade, min, max);
 			break;
 		default:
-			break;
+			return FAIL;
 	}
+
+	return SUCCESS;
 }
 
-static int gradeManagerCheckGrade(gradeManager_t *limit, char grade, int score)
+static int gradeManagerCheckGrade(gradeManager_t *gradeManager, char grade, int score)
 {
-	gradeInfo_t *gradeInfo = gradeManagerGetLimitFromGrade(limit, grade);
+	gradeInfo_t *gradeInfo = gradeManagerGetInfoFromGrade(gradeManager, grade);
 	if(gradeInfo == NULL)
 	{
 		printf("[DEBUG] 입력받은 등급에 대한 임계치 정보가 없음.\n");
@@ -162,45 +190,39 @@ static int gradeManagerCheckGrade(gradeManager_t *limit, char grade, int score)
 	return ((score >= gradeInfo->min) && (score <= gradeInfo->max)) ? TRUE : FALSE;
 }
 
-static char gradeManagerGetGradeFromNumber(gradeManager_t *limit, int score)
+static char gradeManagerGetGradeFromNumber(gradeManager_t *gradeManager, int score)
 {
-	if(limit == NULL)
+	if(score < gradeManager->totalMin || score > gradeManager->totalMax)
 	{
-		printf("[DEBUG] 등급 임계치 목록 객체가 NULL.\n");
+		printf("\n[ERROR] 입력받은 점수에 대한 등급을 판단할 수 없음 .\n");
 		return '?';
 	}
 
-	if(score < 0 || score > 100)
-	{
-		printf("\n[DEBUG] 입력받은 점수에 대한 등급을 판단할 수 없음 .\n");
-		return '?';
-	}
-
-	if(gradeManagerCheckGrade(limit, 'A', score) == TRUE) return 'A';
-	else if(gradeManagerCheckGrade(limit, 'B', score) == TRUE) return 'B';
-	else if(gradeManagerCheckGrade(limit, 'C', score) == TRUE) return 'C';
-	else if(gradeManagerCheckGrade(limit, 'D', score) == TRUE) return 'D';
+	if(gradeManagerCheckGrade(gradeManager, 'A', score) == TRUE) return 'A';
+	else if(gradeManagerCheckGrade(gradeManager, 'B', score) == TRUE) return 'B';
+	else if(gradeManagerCheckGrade(gradeManager, 'C', score) == TRUE) return 'C';
+	else if(gradeManagerCheckGrade(gradeManager, 'D', score) == TRUE) return 'D';
 
 	return 'F';
 }
 
-static gradeInfo_t* gradeManagerGetLimitFromGrade(gradeManager_t *limit, char grade)
+static gradeInfo_t* gradeManagerGetInfoFromGrade(gradeManager_t *gradeManager, char grade)
 {
-	if(limit->limitOfA.grade == grade)
+	if(gradeManager->gradeA.grade == grade)
 	{
-		return &(limit->limitOfA);
+		return &(gradeManager->gradeA);
 	}
-	else if(limit->limitOfB.grade == grade)
+	else if(gradeManager->gradeB.grade == grade)
 	{
-		return &(limit->limitOfB);
+		return &(gradeManager->gradeB);
 	}
-	else if(limit->limitOfC.grade == grade)
+	else if(gradeManager->gradeC.grade == grade)
 	{
-		return &(limit->limitOfC);
+		return &(gradeManager->gradeC);
 	}
-	else if(limit->limitOfD.grade == grade)
+	else if(gradeManager->gradeD.grade == grade)
 	{
-		return &(limit->limitOfD);
+		return &(gradeManager->gradeD);
 	}
 
 	return NULL;

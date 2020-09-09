@@ -16,21 +16,21 @@ iniManager_t *iniManagerNew(const char *fileName)
 	iniManager_t *iniManager = (iniManager_t*)malloc(sizeof(iniManager_t));
 	if(iniManager == NULL)
 	{
-		printf("[DEBUG] ini 매니저 객체 동적 생성 실패. NULL.\n");
+		printf("[DEBUG] iniManager 객체 동적 생성 실패. NULL.\n");
 		return NULL;
 	}
 
 	if(iniManagerGetFieldListfromINI(iniManager->fieldList, fileName) == FAIL)
 	{
-		printf("[ERROR] ini 매니저로 필드 가져오기 실패. NULL.\n");
+		printf("[ERROR] iniManager 로 필드 가져오기 실패. NULL.\n");
 		return NULL;
 	}
 
-	int i = 0;
 	printf("\n[Load fields from the ini file to the field list]\n");
-	for( ; i < 5; i++)
+	int fieldIndex = 0;
+	for( ; fieldIndex < MAX_FIELD_NUM; fieldIndex++)
 	{
-		printf("Loaded field : %s\n", (iniManager->fieldList)[i]);
+		printf("Loaded field : %s\n", (iniManager->fieldList)[fieldIndex]);
 	}
 
 	return iniManager;
@@ -38,6 +38,12 @@ iniManager_t *iniManagerNew(const char *fileName)
 
 void iniManagerDelete(iniManager_t **iniManager)
 {
+	if(*iniManager == NULL)
+	{
+		printf("[DEBUG] iniManager 해제 실패. 객체가 NULL. (iniManager:%p)\n", *iniManager);
+		return;
+	}
+
 	free(*iniManager);
 	*iniManager = NULL;
 }
@@ -84,6 +90,12 @@ int iniManagerGetValueFromINI(iniManager_t *iniManager, const char *field, const
 
 static int iniManagerGetFieldListfromINI(char fieldList[][MAX_FIELD_LEN], const char *fileName)
 {
+	if(fileName == NULL)
+	{
+		printf("[DEBUG] 주어진 fileName 이 NULL. (fileName:%p)", fileName);
+		return FAIL;
+	}
+
 	FILE *filePtr = fopen(fileName, "r");
 	if(filePtr == NULL)
 	{
@@ -109,6 +121,18 @@ static int iniManagerGetFieldListfromINI(char fieldList[][MAX_FIELD_LEN], const 
 
 static int iniManagerFindFieldFromList(iniManager_t *iniManager, const char *field)
 {
+	if(iniManager == NULL)
+	{
+		printf("[DEBUG] iniManager 가 NULL. (iniManager:%p)", iniManager);
+		return FAIL;
+	}
+
+	if(field == NULL)
+	{
+		printf("[DEBUG] 주어진 field 가 NULL. (field:%p)", field);
+		return FAIL;
+	}
+
 	int fieldIndex = 0;
 
 	for( ; fieldIndex < MAX_FIELD_NUM; fieldIndex++)
