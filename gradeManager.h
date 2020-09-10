@@ -12,6 +12,13 @@
 // 조건 거짓
 #define FALSE	0
 
+// 숫자 비교 유형 열거형
+enum COMPARE_TYPE
+{
+	LT = 1, // 작다.
+	GT = 2	// 크다.
+};
+
 /* 점수에 따른 등급을 판단하기 위한 등급 관련 데이터를 저장하는 구조체 */
 typedef struct gradeInfo_s gradeInfo_t;
 struct gradeInfo_s

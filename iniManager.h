@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
 
 //////////////////////////////////////////////////////////////////////////
 /// Definitions & Macros
@@ -16,9 +17,6 @@
 
 // ini 파일에서의 필드 이름 최대 길이
 #define MAX_FIELD_LEN	64
-
-// ini 파일에서 지정한 필드의 키에 해당하는 값의 위치
-#define VALUE_POS	4
 
 /* 점수에 대한 등급 정보를 가지는 ini 파일에 담긴 모든 필드 이름을 저장하는 구조체 */ 
 // <ini 파일 구성>
@@ -39,6 +37,6 @@ struct iniManager_s
 
 iniManager_t *iniManagerNew(const char *fileName);
 void iniManagerDelete(iniManager_t **iniManager);
-int iniManagerGetValueFromField(const iniManager_t *iniManager, const char *field, const char *key, int defaultValue, const char *fileName);
+int iniManagerGetValueFromField(const iniManager_t *iniManager, const char *field, const char *key, int defaultValue, const char *fileName, int *result);
 
 #endif // #ifndef __INI_PARSER_H__

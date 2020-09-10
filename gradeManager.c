@@ -1,6 +1,12 @@
 #include "gradeManager.h"
 
 //////////////////////////////////////////////////////////////////////////
+/// Predefinition of Static Util Function
+//////////////////////////////////////////////////////////////////////////
+
+static int compareNumbers(const char *valueName1, int value1, const char *valueName2, int value2, int type);
+
+//////////////////////////////////////////////////////////////////////////
 /// Predefinitions of Static Functions
 //////////////////////////////////////////////////////////////////////////
 
@@ -9,6 +15,7 @@ static char gradeManagerGetGradeFromNumber(gradeManager_t *gradeManager, int sco
 static gradeInfo_t* gradeManagerGetInfoFromGrade(gradeManager_t *gradeManager, char grade);
 static int gradeManagerLoadINI(gradeManager_t *gradeManager, const char *fileName);
 static int gradeManagerSetGradeInfo(gradeManager_t *gradeManager, char grade, int min, int max);
+static int gradeManagerGetValueFromINI(const gradeManager_t *gradeManager, const char *field, const char *key, int defaultValue, const char *fileName);
 
 //////////////////////////////////////////////////////////////////////////
 /// Static Function for gradeInfo_t
@@ -64,6 +71,7 @@ gradeManager_t* gradeManagerNew(const char *fileName)
 
 	if(gradeManagerLoadINI(gradeManager, fileName) == FAIL)
 	{
+		printf("[로딩 실패]\n\n");
 		gradeManagerDelete(&gradeManager);
 		return NULL;
 	}
@@ -227,46 +235,51 @@ static int gradeManagerLoadINI(gradeManager_t *gradeManager, const char *fileNam
 	}
 
 	printf("\n[등급 정보 로딩 중...]\n");
-	iniManager_t *iniManager = gradeManager->iniManager;
 
-	int totalMin = iniManagerGetValueFromField(iniManager, "[Total]", "min", 0, fileName);
+	int totalMin = gradeManagerGetValueFromINI(gradeManager, "[Total]", "min", 0, fileName);
 	if(totalMin == FAIL) return FAIL;
-	printf("Total min value : %d\n", totalMin);
-	int totalMax = iniManagerGetValueFromField(iniManager, "[Total]", "max", 0, fileName);
+	int totalMax = gradeManagerGetValueFromINI(gradeManager, "[Total]", "max", 100, fileName);
 	if(totalMax == FAIL) return FAIL;
-	printf("Total max value : %d\n", totalMax);
-
+	
 	gradeManager->totalMin = totalMin;
 	gradeManager->totalMax = totalMax;
 
-	int minA = iniManagerGetValueFromField(iniManager, "[A]", "min", 0, fileName);
+	int minA = gradeManagerGetValueFromINI(gradeManager, "[A]", "min", 90, fileName);
 	if(minA == FAIL) return FAIL;
-	printf("Grade A min value : %d\n", minA);
-	int maxA = iniManagerGetValueFromField(iniManager, "[A]", "max", 0, fileName);
+
+
+	int maxA = gradeManagerGetValueFromINI(gradeManager, "[A]", "max", 100, fileName);
 	if(maxA == FAIL) return FAIL;
-	printf("Grade A max value : %d\n", maxA);
+	if(compareNumbers("A max", maxA, "Total max", totalMax, LT) == FAIL) return FAIL;
 
-	int minB = iniManagerGetValueFromField(iniManager, "[B]", "min", 0, fileName);
+	int minB = gradeManagerGetValueFromINI(gradeManager, "[B]", "min", 80, fileName);
 	if(minB == FAIL) return FAIL;
-	printf("Grade B min value : %d\n", minB);
-	int maxB = iniManagerGetValueFromField(iniManager, "[B]", "max", 0, fileName);
+	if(compareNumbers("B min", minB, "A min", minA, LT) == FAIL) return FAIL;
+
+	int maxB = gradeManagerGetValueFromINI(gradeManager, "[B]", "max", 89, fileName);
 	if(maxB == FAIL) return FAIL;
-	printf("Grade B max value : %d\n", maxB);
+	if(compareNumbers("B max", maxB, "A max", maxA, LT) == FAIL) return FAIL;
+	if(compareNumbers("B min", minB, "B max", maxB, LT) == FAIL) return FAIL;
 
-	int minC = iniManagerGetValueFromField(iniManager, "[C]", "min", 0, fileName);
+	int minC = gradeManagerGetValueFromINI(gradeManager, "[C]", "min", 70, fileName);
 	if(minC == FAIL) return FAIL;
-	printf("Grade C min value : %d\n", minC);
-	int maxC = iniManagerGetValueFromField(iniManager, "[C]", "max", 0, fileName);
-	if(maxC == FAIL) return FAIL;
-	printf("Grade C max value : %d\n", maxC);
+	if(compareNumbers("C min", minC, "B min", minB, LT) == FAIL) return FAIL;
 
-	int minD = iniManagerGetValueFromField(iniManager, "[D]", "min", 0, fileName);
+	int maxC = gradeManagerGetValueFromINI(gradeManager, "[C]", "max", 79, fileName);
+	if(maxC == FAIL) return FAIL;
+	if(compareNumbers("C max", maxC, "B max", maxB, LT) == FAIL) return FAIL;
+	if(compareNumbers("C min", minC, "C max", maxC, LT) == FAIL) return FAIL;
+
+	int minD = gradeManagerGetValueFromINI(gradeManager, "[D]", "min", 60, fileName);
 	if(minD == FAIL) return FAIL;
-	printf("Grade D min value : %d\n", minD);
-	int maxD = iniManagerGetValueFromField(iniManager, "[D]", "max", 0, fileName);
+	if(compareNumbers("D min", minD, "C min", minC, LT) == FAIL) return FAIL;
+	if(compareNumbers("D min", minD, "Total min", totalMin, GT) == FAIL) return FAIL;
+
+	int maxD = gradeManagerGetValueFromINI(gradeManager, "[D]", "max", 69, fileName);
 	if(maxD == FAIL) return FAIL;
-	printf("Grade D max value : %d\n", maxD);
-	
+	if(compareNumbers("D max", maxD, "C max", maxC, LT) == FAIL) return FAIL;
+	if(compareNumbers("D min", minD, "D max", maxD, LT) == FAIL) return FAIL;
+
 	if(gradeManagerSetGradeInfo(gradeManager, 'A', minA, maxA) == FAIL) return FAIL;
 	if(gradeManagerSetGradeInfo(gradeManager, 'B', minB, maxB) == FAIL) return FAIL;
 	if(gradeManagerSetGradeInfo(gradeManager, 'C', minC, maxC) == FAIL) return FAIL;
@@ -309,3 +322,58 @@ static int gradeManagerSetGradeInfo(gradeManager_t *gradeManager, char grade, in
 	return SUCCESS;
 }
 
+/**
+ * @fn static int gradeManagerGetValueFromINI(const gradeManager_t *gradeManager, const char *field, const char *key, int defaultValue, const char *fileName)
+ * @brief iniManager 로 부터 지정한 필드와 키에 해당하는 값을 반환하는 함수
+ * gradeManagerLoadINI 함수에서 호출되기 때문에 전달받은 구조체 포인터와 필드, 키, 파일 이름에 대한 NULL 체크를 수행하지 않는다.
+ * @param gradeManager 등급에 대한 정보를 저장할 구조체(입력, 읽기 전용)
+ * @param field 키를 찾기 위한 필드 이름(입력, 읽기 전용)
+ * @param key 값을 찾기 위한 키 이름(입력, 읽기 전용)
+ * @param defaultValue 찾고자 하는 키에 대한 값이 존재하지 않을 때 반환될 값(입력)
+ * @param fileName 등급에 대한 정보를 가지는 ini 파일 이름(입력, 읽기 전용)
+ * @return 성공 시 SUCCESS, 실패 시 FAIL 반환
+ */
+static int gradeManagerGetValueFromINI(const gradeManager_t *gradeManager, const char *field, const char *key, int defaultValue, const char *fileName)
+{
+	int result = FAIL;
+	int value = iniManagerGetValueFromField(gradeManager->iniManager, field, key, defaultValue, fileName, &result);
+	if(result == FAIL) return FAIL;
+	printf("%s %s value : %d\n", field, key, value);
+	return value;
+}
+
+//////////////////////////////////////////////////////////////////////////
+/// Static Util Function
+//////////////////////////////////////////////////////////////////////////
+
+/**
+ * @fn static int compareNumbers(const char *valueName1, int value1, const char *valueName2, int value2, int type)
+ * @brief 두 개의 숫자를 비교 유형에 따라 비교하는 함수
+ * gradeManagerLoadINI 함수에서 호출되기 때문에 전달받은 문자열에 대한 NULL 체크를 수행하지 않는다.
+ * @param field1 비교 결과가 거짓일 때 출력할 왼쪽 피연산자의 필드와 키 이름
+ * @param value1 왼쪽 피연산자 값
+ * @param field2 비교 결과가 거짓일 때 출력할 오른쪽 피연산자의 필드와 키 이름
+ * @param value2 오른쪽 피연산자 값
+ * @return 성공 시 TRUE, 실패 시 FALSE 반환
+ */
+static int compareNumbers(const char *valueName1, int value1, const char *valueName2, int value2, int type)
+{
+	int result = TRUE;
+
+	if(type == GT)
+	{
+		if(value1 < value2) result = FALSE;
+	}
+	else if(type == LT)
+	{
+		if(value1 > value2) result = FALSE;
+	}
+	else
+	{
+		printf("알 수 없는 숫자 비교 유형.\n");
+		return FALSE;
+	}
+
+	if(result == FALSE) printf("잘못된 범위 (%s:%d, %s:%d)\n", valueName1, value1, valueName2, value2);
+	return result;
+}

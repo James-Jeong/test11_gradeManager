@@ -1,7 +1,7 @@
 #include "iniManager.h"
 
 //////////////////////////////////////////////////////////////////////////
-/// Predefinitions of Static Functions
+/// Predefinitions of Static Functions for iniManager_t
 //////////////////////////////////////////////////////////////////////////
 
 static int iniManagerLoadInfoFromINI(iniManager_t *iniManager, const char *fileName);
@@ -35,13 +35,15 @@ iniManager_t *iniManagerNew(const char *fileName)
 		return NULL;
 	}
 
+	printf("\n[ini 파일의 필드 로딩 중...]\n");
+
 	if(iniManagerLoadInfoFromINI(iniManager, fileName) == FAIL)
 	{
+		printf("[로딩 실패]\n\n");
 		free(iniManager);
 		return NULL;
 	}
 
-	printf("\n[ini 파일의 필드 로딩 중...]\n");
 	int fieldIndex = 0;
 	for( ; fieldIndex < iniManager->fieldMaxNum; fieldIndex++)
 	{
@@ -97,25 +99,22 @@ void iniManagerDelete(iniManager_t **iniManager)
  * @param key 값을 찾기 위한 키 이름(입력, 읽기 전용)
  * @param defaultValue 찾고자 하는 키에 대한 값이 존재하지 않을 때 반환될 값(입력)
  * @param fileName 등급에 대한 정보를 가지는 ini 파일 이름(입력, 읽기 전용)
+ * @param isError 함수 실행 성공 여부(성공 시 SUCCESS, 실패 시 FAIL 반환)
  * @return 성공 시 지정한 필드에 대한 키의 값을 반환, 실패 시 FAIL 반환
  */
-int iniManagerGetValueFromField(const iniManager_t *iniManager, const char *field, const char *key, int defaultValue, const char *fileName)
+int iniManagerGetValueFromField(const iniManager_t *iniManager, const char *field, const char *key, int defaultValue, const char *fileName, int *result)
 {
-	if(iniManager == NULL)
+	if(iniManager == NULL || field == NULL || key == NULL || fileName == NULL)
 	{
-		printf("[DEBUG] iniManager 가 NULL. (iniManager:%p)\n", iniManager);
-		return FAIL;
-	}
-
-	if(field == NULL || key == NULL || fileName == NULL)
-	{
-		printf("[DEBUG] 매개변수 참조 오류. (field:%p, key:%p, fileName:%p)\n", field, key, fileName);
+		printf("[DEBUG] 매개변수 참조 오류. (iniManager:%p, field:%p, key:%p, fileName:%p)\n", iniManager, field, key, fileName);
+		*result = FAIL;
 		return FAIL;
 	}
 
 	if(iniManagerFindFieldFromList(iniManager, field) == FAIL)
 	{
 		printf("[ERROR] ini 필드 리스트부터 주어진 필드 검색 실패. (fileName:%s, field:%s)\n", fileName, field);
+		*result = FAIL;
 		return FAIL;
 	}
 
@@ -123,28 +122,44 @@ int iniManagerGetValueFromField(const iniManager_t *iniManager, const char *fiel
 	if(filePtr == NULL)
 	{
 		printf("[DEBUG] 파일 읽기 실패. (fileName:%s)\n", fileName);
+		*result = FAIL;
 		return FAIL;
 	}
 
+	int returnValue = defaultValue;
 	char fieldFindBuffer[MAX_FIELD_LEN] = { '\0' };
 	char keyFindBuffer[MAX_FIELD_LEN] = { '\0' };
 
+	// 1) 전체 필드 검색
 	while(fgets(fieldFindBuffer, MAX_FIELD_LEN, filePtr) != NULL)
 	{
+		// 2) 주어진 필드 일치
 		if(strncmp(fieldFindBuffer, field, strlen(field)) == 0)
 		{
+			// 3) 해당 필드에서 키 검색
 			while(fgets(keyFindBuffer, MAX_FIELD_LEN, filePtr) != NULL)
 			{
+				// 4) 주어진 키 일치
 				if(strncmp(keyFindBuffer, key, strlen(key)) == 0)
 				{
-					return atoi(keyFindBuffer + VALUE_POS);
+					// 5) 해당 키의 값 반환
+					// 키가 위치한 문자열에서 값의 위치 : [키 길이] + [등호 길이]
+					// ex) min=80 -> 80 은 문자열에서 4 번째 위치에 위치한다.
+					char *valuePtr = keyFindBuffer + (strlen(key) + 1);
+					int value = atoi(valuePtr);
+
+					// 문자면 defaultValue 반환
+					if(isdigit(valuePtr[0]) == 0) break;
+					returnValue = value;
+					break;
 				}
 			}
 		}
 	}
 
 	fclose(filePtr);
-	return defaultValue;
+	*result = SUCCESS;
+	return returnValue;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -247,6 +262,7 @@ static int iniManagerGetFieldMaxNumfromINI(iniManager_t *iniManager, const char 
 	}
 
 	int fieldNum = 0;
+	int result = SUCCESS;
 	char fieldFindBuffer[MAX_FIELD_LEN] = { '\0' };
 
 	while(fgets(fieldFindBuffer, MAX_FIELD_LEN, filePtr) != NULL)
@@ -259,12 +275,11 @@ static int iniManagerGetFieldMaxNumfromINI(iniManager_t *iniManager, const char 
 	if(iniManager->fieldMaxNum == 0)
 	{
 		printf("[ERROR] 파일 읽기 실패. 파일 내용 또는 필드가 존재하지 않음. (필드 형식:[field])\n");
-		fclose(filePtr);
-		return FAIL;
+		result = FAIL;
 	}
 
 	fclose(filePtr);
-	return SUCCESS;
+	return result;
 }
 
 /**
