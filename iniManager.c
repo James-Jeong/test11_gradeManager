@@ -16,6 +16,7 @@ static int iniManagerFindFieldFromList(const iniManager_t *iniManager, const cha
 /**
  * @fn iniManager_t *iniManagerNew(const char *fileName)
  * @brief ini 파일에 대한 정보를 관리하기 위한 iniManager_t 객체를 새로 생성하는 함수
+ * 외부에서 접근할 수 있는 함수이므로 생성된 구조체 포인터에 대한 NULL 체크를 수행한다.
  * @param fileName 점수에 대한 등급 정보를 가지고 있는 ini 파일의 이름(입력, 읽기 전용)
  * @return 새로 생성된 iniManager_t 객체 반환
  */
@@ -53,6 +54,7 @@ iniManager_t *iniManagerNew(const char *fileName)
 /**
  * @fn void iniManagerDelete(iniManager_t **iniManager)
  * @brief 생성된 iniManager_t 구조체 객체의 메모리를 해제하는 함수
+ * 외부에서 접근할 수 있는 함수이므로 전달받은 구조체 포인터에 대한 NULL 체크를 수행한다.
  * @param iniManager 삭제할 iniManager_t 구조체 객체(입력)
  * @return 반환값 없음
  */
@@ -87,6 +89,7 @@ void iniManagerDelete(iniManager_t **iniManager)
 /**
  * @fn int iniManagerGetValueFromField(iniManager_t *iniManager, const char *field, const char *key, int defaultValue, const char *fileName)
  * @brief 지정한 필드에 대한 키의 값을 반환하는 함수
+ * 외부에서 접근할 수 있는 함수이므로 전달받은 구조체 포인터에 대한 NULL 체크를 수행한다.
  * field, key, value 에 대한 설명은 헤더 파일에 명시됨.
  * @param iniManager ini 파일 내용을 관리하는 구조체(입력, 읽기 전용)
  * @param field 키를 찾기 위한 필드 이름(입력, 읽기 전용)
@@ -150,6 +153,7 @@ int iniManagerGetValueFromField(const iniManager_t *iniManager, const char *fiel
 /**
  * @fn static int iniManagerLoadInfoFromINI(iniManager_t *iniManager, const char *fileName)
  * @brief ini 파일 내용을 iniManager_t 구조체에 저장하는 함수
+ * iniManagerNew 함수에서 호출되기 때문에 전달받은 구조체 포인터에 대한 NULL 체크를 수행하지 않는다.
  * @param iniManager ini 파일 내용을 관리하는 구조체(출력)
  * @param fileName 등급에 대한 정보를 가지는 ini 파일 이름(입력, 읽기 전용)
  * @return 성공 시 SUCCESS, 실패 시 FAIL 반환
@@ -174,6 +178,7 @@ static int iniManagerLoadInfoFromINI(iniManager_t *iniManager, const char *fileN
 /**
  * @fn static int iniManagerGetFieldListfromINI(iniManager_t *iniManager, const char *fileName)
  * @brief ini 파일로부터 필드 이름들을 가져와서 iniManager_t 구조체에 저장하는 함수
+ * iniManagerLoadInfoFromINI 함수에서 호출되기 때문에 전달받은 구조체 포인터에 대한 NULL 체크를 수행하지 않는다.
  * @param iniManager ini 파일 내용을 관리하는 구조체(출력)
  * @param fileName 등급에 대한 정보를 가지는 ini 파일 이름(입력, 읽기 전용)
  * @return 성공 시 SUCCESS, 실패 시 FAIL 반환
@@ -226,6 +231,7 @@ static int iniManagerGetFieldListfromINI(iniManager_t *iniManager, const char *f
 /**
  * @fn static int iniManagerGetFieldMaxNumfromINI(iniManager_t *iniManager, const char *fileName)
  * @brief ini 파일로부터 필드의 전체 개수를 구해서 iniManager_t 구조체에 저장하는 함수
+ * iniManagerLoadInfoFromINI 함수에서 호출되기 때문에 전달받은 구조체 포인터에 대한 NULL 체크를 수행하지 않는다.
  * @param iniManager ini 파일 내용을 관리하는 구조체(출력)
  * @param fileName 등급에 대한 정보를 가지는 ini 파일 이름(입력, 읽기 전용)
  * @return 성공 시 SUCCESS, 실패 시 FAIL 반환
@@ -263,6 +269,7 @@ static int iniManagerGetFieldMaxNumfromINI(iniManager_t *iniManager, const char 
 /**
  * @fn static int iniManagerFindFieldFromList(const iniManager_t *iniManager, const char *field)
  * @brief iniManager_t 구조체의 필드 리스트에서 지정한 필드 이름이 존재하는지 검색하는 함수
+ * iniManagerGetValueFromField 함수에서 호출되기 때문에 전달받은 구조체 포인터에 대한 NULL 체크를 수행하지 않는다.
  * @param iniManager ini 파일 내용을 관리하는 구조체(입력, 읽기 전용)
  * @param field 검색할 필드 이름(입력, 읽기 전용)
  * @return 성공 시 SUCCESS, 실패 시 FAIL 반환
