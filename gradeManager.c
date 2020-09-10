@@ -212,7 +212,7 @@ static gradeInfo_t* gradeManagerGetInfoFromGrade(gradeManager_t *gradeManager, c
 /**
  * @fn static int gradeManagerLoadINI(gradeManager_t *gradeManager, const char *fileName)
  * @brief ini 파일에 대한 정보를 gradeManager 구조체에 저장하는 함수
- * gradeManagerNew 함수에서 호출되기 때문에 전달받은 구조체 포인터에 대한 NULL 체크를 수행하지 않는다.
+ * gradeManagerNew 함수에서 호출되기 때문에 전달받은 구조체 포인터와 파일 이름에 대한 NULL 체크를 수행하지 않는다.
  * @param gradeManager 등급에 대한 정보를 관리하는 구조체(입력 및 출력)
  * @param fileName 등급에 대한 정보를 관리하는 ini 파일 이름(입력, 읽기 전용)
  * @return 성공 시 SUCCESS, 실패 시 FAIL 반환
