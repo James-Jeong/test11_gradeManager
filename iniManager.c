@@ -24,7 +24,7 @@ iniManager_t *iniManagerNew(const char *fileName)
 {
 	if(fileName == NULL)
 	{
-		printf("[DEBUG] 주어진 fileName 이 NULL. (fileName:%p)\n", fileName);
+		printf("[DEBUG] 주어진 fileName 이 NULL.\n");
 		return NULL;
 	}
 
@@ -65,7 +65,7 @@ void iniManagerDelete(iniManager_t **iniManager)
 {
 	if(*iniManager == NULL)
 	{
-		printf("[DEBUG] iniManager 해제 실패. 객체가 NULL. (iniManager:%p)\n", *iniManager);
+		printf("[DEBUG] iniManager 해제 실패. 객체가 NULL.\n");
 		return;
 	}
 
@@ -139,6 +139,8 @@ int iniManagerGetValueFromField(const iniManager_t *iniManager, const char *fiel
 			// 3) 해당 필드에서 키 검색
 			while(fgets(keyFindBuffer, MAX_FIELD_LEN, filePtr) != NULL)
 			{
+				if(strchr(keyFindBuffer, '[') != NULL) break;
+
 				// 4) 주어진 키 일치
 				if(strncmp(keyFindBuffer, key, strlen(key)) == 0)
 				{
@@ -151,14 +153,16 @@ int iniManagerGetValueFromField(const iniManager_t *iniManager, const char *fiel
 					// 문자면 defaultValue 반환
 					if(isdigit(valuePtr[0]) == 0) break;
 					returnValue = value;
+					*result = SUCCESS;
 					break;
 				}
 			}
+			break;
 		}
 	}
 
+	if(*result == FAIL) printf("[ERROR] 지정한 필드에 대한 키의 값을 찾을 수 없음. (field:%s, key:%s, fileName:%s)\n", field, key, fileName);
 	fclose(filePtr);
-	*result = SUCCESS;
 	return returnValue;
 }
 
@@ -207,7 +211,7 @@ static int iniManagerGetFieldListfromINI(iniManager_t *iniManager, const char *f
 	iniManager->fieldList = (char**)malloc((size_t)fieldMaxNum * sizeof(char*));
 	if(iniManager->fieldList == NULL)
 	{
-		printf("[DEBUG] 새로 생성한 fieldList 객체가 NULL. (iniManager:%p, iniManager->fieldList:%p)\n", iniManager, iniManager->fieldList);
+		printf("[DEBUG] 새로 생성한 fieldList 객체가 NULL. (iniManager:%p)\n", iniManager);
 		return FAIL;
 	}
 
@@ -216,7 +220,7 @@ static int iniManagerGetFieldListfromINI(iniManager_t *iniManager, const char *f
 		iniManager->fieldList[fieldIndex] = (char*)malloc(MAX_FIELD_LEN * sizeof(char));
 		if(iniManager->fieldList == NULL)
 		{
-			printf("[DEBUG] 새로 생성한 fieldList 의 내부 동적 배열이 NULL. (iniManager:%p, iniManager->fieldList:%p, iniManager->fieldList[%d]:%p)\n", iniManager, iniManager->fieldList, fieldIndex, iniManager->fieldList[fieldIndex]);
+			printf("[DEBUG] 새로 생성한 fieldList 의 내부 동적 배열이 NULL. (iniManager:%p, iniManager->fieldList:%p)\n", iniManager, iniManager->fieldList);
 			return FAIL;
 		}
 	}

@@ -34,7 +34,7 @@ static void gradeInfoSetData(gradeInfo_t *info, char grade, int min, int max)
 {
 	if(info == NULL)
 	{
-		printf("[DEBUG] gradeInfo 가 NULL. (info:%p)\n", info);
+		printf("[DEBUG] gradeInfo 가 NULL.\n");
 		return;
 	}
 
@@ -58,7 +58,7 @@ gradeManager_t* gradeManagerNew(const char *fileName)
 {
 	if(fileName == NULL)
 	{
-		printf("[DEBUG] 주어진 fileName 이 NULL. (fileName:%p)\n", fileName);
+		printf("[DEBUG] 주어진 fileName 이 NULL.\n");
 		return NULL;
 	}
 
@@ -90,7 +90,7 @@ void gradeManagerDelete(gradeManager_t **gradeManager)
 {
 	if(*gradeManager == NULL)
 	{
-		printf("[DEBUG] gradeManager 해제 실패. 객체가 NULL. (gradeManager:%p)\n", *gradeManager);
+		printf("[DEBUG] gradeManager 해제 실패. 객체가 NULL.\n");
 		return;
 	}
 
@@ -116,13 +116,13 @@ void gradeManagerEvaluateGrade(gradeManager_t *gradeManager, const int *scores, 
 {
 	if(gradeManager == NULL)
 	{
-		printf("[DEBUG] gradeManager 가 NULL. (gradeManager:%p)\n", gradeManager);
+		printf("[DEBUG] gradeManager 가 NULL.\n");
 		return;
 	}
 
 	if(scores == NULL)
 	{
-		printf("[DEBUG] 입력받은 점수 목록이 NULL. (scores:%p)\n", scores);
+		printf("[DEBUG] 입력받은 점수 목록이 NULL.\n");
 		return;
 	}
 
@@ -247,10 +247,10 @@ static int gradeManagerLoadINI(gradeManager_t *gradeManager, const char *fileNam
 	int minA = gradeManagerGetValueFromINI(gradeManager, "[A]", "min", 90, fileName);
 	if(minA == FAIL) return FAIL;
 
-
 	int maxA = gradeManagerGetValueFromINI(gradeManager, "[A]", "max", 100, fileName);
 	if(maxA == FAIL) return FAIL;
 	if(compareNumbers("A max", maxA, "Total max", totalMax, LT) == FAIL) return FAIL;
+	if(compareNumbers("A min", minA, "A max", maxA, LT) == FAIL) return FAIL;
 
 	int minB = gradeManagerGetValueFromINI(gradeManager, "[B]", "min", 80, fileName);
 	if(minB == FAIL) return FAIL;
