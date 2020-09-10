@@ -14,8 +14,6 @@
 // 함수 실행 실패
 #define FAIL	-1
 
-// ini 파일에서의 전체 필드 개수
-#define MAX_FIELD_NUM	5
 // ini 파일에서의 필드 이름 최대 길이
 #define MAX_FIELD_LEN	64
 
@@ -24,13 +22,15 @@
 
 /* 점수에 대한 등급 정보를 가지는 ini 파일에 담긴 모든 필드 이름을 저장하는 구조체 */ 
 // <ini 파일 구성>
-// [필드 이름]
-// (key)=(value)
+// [field] -> 등급 이름
+// (key)=(value) -> key : 최대 또는 최소값을 식별하는 이름 / value : 해당 key 의 값
 typedef struct iniManager_s iniManager_t;
 struct iniManager_s
 {
+	// 필드 전체 개수
+	int fieldMaxNum;
 	// 필드 이름을 저장하는 배열
-	char fieldList[MAX_FIELD_NUM][MAX_FIELD_LEN];
+	char **fieldList;
 };
 
 //////////////////////////////////////////////////////////////////////////

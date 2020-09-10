@@ -40,7 +40,7 @@ struct gradeManager_s
 	int totalMin;
 	// 전체 범위의 최대값
 	int totalMax;
-	// ini 파일에 대한 정보
+	// ini 파일에 대한 정보를 관리하는 구조체
 	iniManager_t *iniManager;
 };
 
@@ -48,7 +48,7 @@ struct gradeManager_s
 /// Local Functions for gradeManager_t
 //////////////////////////////////////////////////////////////////////////
 
-gradeManager_t* gradeManagerNew();
+gradeManager_t* gradeManagerNew(const char *fileName);
 void gradeManagerDelete(gradeManager_t **manager);
 void gradeManagerEvaluateGrade(gradeManager_t *manager, const int *scores, int size);
 

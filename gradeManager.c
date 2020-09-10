@@ -37,16 +37,23 @@ static void gradeInfoSetData(gradeInfo_t *info, char grade, int min, int max)
 }
 
 //////////////////////////////////////////////////////////////////////////
-/// Public Functions for gradeManager_t
+/// Local Functions for gradeManager_t
 //////////////////////////////////////////////////////////////////////////
 
 /**
- * @fn gradeManager_t* gradeManagerNew()
+ * @fn gradeManager_t* gradeManagerNew(const char *fileName)
  * @brief 지정한 점수에 대한 등급 정보를 관리하기 위한 구조체 객체를 새로 생성하는 함수
+ * @param fileName 등급에 대한 정보를 관리하는 ini 파일 이름(입력, 읽기 전용)
  * @return 새로 생성된 gradeManager_t 구조체 객체 반환
  */
-gradeManager_t* gradeManagerNew()
+gradeManager_t* gradeManagerNew(const char *fileName)
 {
+	if(fileName == NULL)
+	{
+		printf("[DEBUG] 주어진 fileName 이 NULL. (fileName:%p)\n", fileName);
+		return NULL;
+	}
+
 	gradeManager_t *gradeManager = (gradeManager_t*)malloc(sizeof(gradeManager_t));
 	if(gradeManager == NULL)
 	{
@@ -54,14 +61,7 @@ gradeManager_t* gradeManagerNew()
 		return NULL;
 	}
 
-	gradeManager->iniManager = iniManagerNew("./grade.ini");
-	if(gradeManager->iniManager == NULL)
-	{
-		free(gradeManager);
-		return NULL;
-	}
-
-	if(gradeManagerLoadINI(gradeManager, "./grade.ini") == FAIL)
+	if(gradeManagerLoadINI(gradeManager, fileName) == FAIL)
 	{
 		gradeManagerDelete(&gradeManager);
 		return NULL;
@@ -84,7 +84,11 @@ void gradeManagerDelete(gradeManager_t **gradeManager)
 		return;
 	}
 
-	iniManagerDelete(&((*gradeManager)->iniManager));
+	if((*gradeManager)->iniManager != NULL)
+	{
+		iniManagerDelete(&((*gradeManager)->iniManager));
+	}
+
 	free(*gradeManager);
 	*gradeManager = NULL;
 }
@@ -117,10 +121,10 @@ void gradeManagerEvaluateGrade(gradeManager_t *gradeManager, const int *scores, 
 		return;
 	}
 
-	int numPos = 0;
-	for( ; numPos < size; numPos++)	
+	int scorePos = 0;
+	for( ; scorePos < size; scorePos++)	
 	{
-		printf("%d -> %c\n", scores[numPos], gradeManagerGetGradeFromNumber(gradeManager, scores[numPos]));
+		printf("%d -> %c\n", scores[scorePos], gradeManagerGetGradeFromNumber(gradeManager, scores[scorePos]));
 	}
 }
 
@@ -203,14 +207,14 @@ static gradeInfo_t* gradeManagerGetInfoFromGrade(gradeManager_t *gradeManager, c
  * @fn static int gradeManagerLoadINI(gradeManager_t *gradeManager, const char *fileName)
  * @brief ini 파일에 대한 정보를 gradeManager 구조체에 저장하는 함수
  * @param gradeManager 등급에 대한 정보를 관리하는 구조체(입력 및 출력)
- * @param fileName ini 파일 이름(입력, 읽기 전용)
+ * @param fileName 등급에 대한 정보를 관리하는 ini 파일 이름(입력, 읽기 전용)
  * @return 성공 시 SUCCESS, 실패 시 FAIL 반환
  */
 static int gradeManagerLoadINI(gradeManager_t *gradeManager, const char *fileName)
 {
-	if(fileName == NULL)
+	gradeManager->iniManager = iniManagerNew(fileName);
+	if(gradeManager->iniManager == NULL)
 	{
-		printf("[DEBUG] 주어진 fileName 이 NULL. (fileName:%p)\n", fileName);
 		return FAIL;
 	}
 
