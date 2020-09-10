@@ -41,12 +41,13 @@ iniManager_t *iniManagerNew(const char *fileName)
 		return NULL;
 	}
 
-	printf("\n[Load fields from the ini file to the field list]\n");
+	printf("\n[ini 파일의 필드 로딩 중...]\n");
 	int fieldIndex = 0;
 	for( ; fieldIndex < iniManager->fieldMaxNum; fieldIndex++)
 	{
 		printf("Loaded field : %s\n", (iniManager->fieldList)[fieldIndex]);
 	}
+	printf("[로딩 완료]\n");
 
 	return iniManager;
 }

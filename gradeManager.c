@@ -127,8 +127,9 @@ void gradeManagerEvaluateGrade(gradeManager_t *gradeManager, const int *scores, 
 	int scorePos = 0;
 	for( ; scorePos < size; scorePos++)	
 	{
-		printf("%d -> %c\n", scores[scorePos], gradeManagerGetGradeFromNumber(gradeManager, scores[scorePos]));
+		printf("[%d] [%d -> %c]\n", scorePos, scores[scorePos], gradeManagerGetGradeFromNumber(gradeManager, scores[scorePos]));
 	}
+	printf("\n");
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -225,7 +226,7 @@ static int gradeManagerLoadINI(gradeManager_t *gradeManager, const char *fileNam
 		return FAIL;
 	}
 
-	printf("\n[Load values from the field list to variables]\n");
+	printf("\n[등급 정보 로딩 중...]\n");
 	iniManager_t *iniManager = gradeManager->iniManager;
 
 	int totalMin = iniManagerGetValueFromField(iniManager, "[Total]", "min", 0, fileName);
@@ -265,13 +266,13 @@ static int gradeManagerLoadINI(gradeManager_t *gradeManager, const char *fileNam
 	int maxD = iniManagerGetValueFromField(iniManager, "[D]", "max", 0, fileName);
 	if(maxD == FAIL) return FAIL;
 	printf("Grade D max value : %d\n", maxD);
-	printf("\n");
-
+	
 	if(gradeManagerSetGradeInfo(gradeManager, 'A', minA, maxA) == FAIL) return FAIL;
 	if(gradeManagerSetGradeInfo(gradeManager, 'B', minB, maxB) == FAIL) return FAIL;
 	if(gradeManagerSetGradeInfo(gradeManager, 'C', minC, maxC) == FAIL) return FAIL;
 	if(gradeManagerSetGradeInfo(gradeManager, 'D', minD, maxD) == FAIL) return FAIL;
 
+	printf("[로딩 완료]\n\n");
 	return SUCCESS;
 }
 

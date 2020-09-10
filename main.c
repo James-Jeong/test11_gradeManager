@@ -6,10 +6,12 @@
 
 int main()
 {
-	int inputNumbers[10] = { 100, 99, 50, 80, 20, 33, 79, 56, 44, 69 };
+	int inputNumbers[14] = { 100, 99, 50, 80, 20, 33, 79, 56, 44, 69, 0, -1, 101, 999 };
 
 	gradeManager_t *limit = gradeManagerNew("./grade.ini");
-	gradeManagerEvaluateGrade(limit, inputNumbers, 10);
+	printf("[등급 검사 시작]\n");
+	gradeManagerEvaluateGrade(limit, inputNumbers, 14);
+	printf("[등급 검사 종료]\n\n");
 	gradeManagerDelete(&limit);
 
 	return SUCCESS;
