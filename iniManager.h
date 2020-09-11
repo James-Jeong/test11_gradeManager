@@ -15,8 +15,41 @@
 // 함수 실행 실패
 #define FAIL	-1
 
+// ini 파일에서의 키 이름 최대 길이
+#define MAX_KEY_LEN		64
 // ini 파일에서의 필드 이름 최대 길이
 #define MAX_FIELD_LEN	64
+// 필드에 지정된 키의 개수
+#define NUM_OF_KEYS		2
+
+/**
+ * @struct iniKey_t
+ * @brief 필드에 대한 키와 키에 대한 값을 관리하는 구조체
+ */
+typedef struct iniKey_s iniKey_t;
+struct iniKey_s
+{
+	// 해당 키 정보를 소유한 필드 이름
+	char fieldName[MAX_FIELD_LEN];
+	// 키 이름
+	char name[MAX_KEY_LEN];
+	// 키와 1:1 대응하는 값
+	int value;
+};
+
+/**
+ * @struct iniField_t
+ * @brief ini 파일에서 키에 대한 정보를 식별하기 위한 필드를 관리하는 구조체
+ */
+typedef struct iniField_s iniField_t;
+struct iniField_s
+{
+	// 필드 이름
+	char name[MAX_FIELD_LEN];
+	int keyMaxNum;
+	// 해당 필드에 대한 키와 키에 대한 값을 저장
+	iniKey_t **keyList;
+};
 
 /**
  * @struct iniManager_t
@@ -30,8 +63,7 @@ struct iniManager_s
 {
 	// 필드 전체 개수
 	int fieldMaxNum;
-	// 필드 이름을 저장하는 배열
-	char **fieldList;
+	iniField_t **fieldList;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -40,6 +72,6 @@ struct iniManager_s
 
 iniManager_t *iniManagerNew(const char *fileName);
 void iniManagerDelete(iniManager_t **iniManager);
-int iniManagerGetValueFromField(const iniManager_t *iniManager, const char *field, const char *key, int defaultValue, const char *fileName, int *result);
+int iniManagerGetValueFromField(const iniManager_t *iniManager, const char *fieldName, const char *keyName, int defaultValue, const char *fileName, int *result);
 
 #endif // #ifndef __INI_PARSER_H__

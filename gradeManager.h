@@ -63,6 +63,6 @@ struct gradeManager_s
 
 gradeManager_t* gradeManagerNew(const char *fileName);
 void gradeManagerDelete(gradeManager_t **manager);
-void gradeManagerEvaluateGrade(gradeManager_t *manager, const int *scores, int size);
+void gradeManagerEvaluateGrade(const gradeManager_t *manager, const int *scores, int size);
 
 #endif // #ifndef __GRADE_LIMIT_H__

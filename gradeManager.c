@@ -52,7 +52,7 @@ static void gradeInfoSetData(gradeInfo_t *info, char grade, int min, int max)
  * @brief 지정한 점수에 대한 등급 정보를 관리하기 위한 구조체 객체를 새로 생성하는 함수
  * 외부에서 접근할 수 있는 함수이므로 생성된 구조체 포인터에 대한 NULL 체크를 수행한다.
  * @param fileName 점수에 대한 등급 정보를 가지고 있는 ini 파일의 이름(입력, 읽기 전용)
- * @return 새로 생성된 gradeManager_t 구조체 객체 반환
+ * @return 성공 시 새로 생성된 gradeManager_t 구조체 객체, 실패 시 NULL 반환
  */
 gradeManager_t* gradeManagerNew(const char *fileName)
 {
@@ -84,7 +84,7 @@ gradeManager_t* gradeManagerNew(const char *fileName)
  * @fn void gradeManagerDelete(gradeManager_t **gradeManager)
  * @brief 생성된 gradeManager_t 구조체 객체의 메모리를 해제하는 함수
  * 외부에서 접근할 수 있는 함수이므로 전달받은 구조체 포인터에 대한 NULL 체크를 수행한다.
- * @param gradeManager 삭제할 gradeManager_t 구조체 객체(입력)
+ * @param gradeManager 삭제할 gradeManager_t 구조체 객체(입력, 이중 포인터)
  * @return 반환값 없음
  */
 void gradeManagerDelete(gradeManager_t **gradeManager)
@@ -105,15 +105,15 @@ void gradeManagerDelete(gradeManager_t **gradeManager)
 }
 
 /**
- * @fn void gradeManagerEvaluateGrade(gradeManager_t *gradeManager, const int *scores, int size)
+ * @fn void gradeManagerEvaluateGrade(const gradeManager_t *gradeManager, const int *scores, int size)
  * @brief 지정한 점수에 대한 등급을 판단하는 함수
  * 외부에서 접근할 수 있는 함수이므로 전달받은 구조체 포인터에 대한 NULL 체크를 수행한다.
- * @param gradeManager 등급 정보를 관리하는 구조체(입력)
+ * @param gradeManager 등급 정보를 관리하는 구조체(입력, 읽기 전용)
  * @param scores 등급 판단을 위한 점수들을 담은 정수 배열(입력, 읽기 전용)
  * @param size 정수 배열의 전체 크기(입력)
  * @return 반환값 없음
  */
-void gradeManagerEvaluateGrade(gradeManager_t *gradeManager, const int *scores, int size)
+void gradeManagerEvaluateGrade(const gradeManager_t *gradeManager, const int *scores, int size)
 {
 	if(gradeManager == NULL)
 	{
@@ -173,7 +173,7 @@ static char gradeManagerGetGradeFromNumber(const gradeManager_t *gradeManager, i
  * @fn static int gradeManagerCheckGrade(const gradeManager_t *gradeManager, char grade, int score)
  * @brief 지정한 점수에 대해 등급을 판단하는 함수
  * gradeManagerGetGradeFromNumber 함수에서 호출되기 때문에 전달받은 구조체 포인터에 대한 NULL 체크를 수행하지 않는다.
- * @param gradeManager 등급 정보를 관리하는 구조체(입력)
+ * @param gradeManager 등급 정보를 관리하는 구조체(입력, 읽기 전용)
  * @param grade 판단할 등급 문자(입력)
  * @param score 등급 판단에 사용될 점수(입력)
  * @return 성공 시 TRUE, 실패 시 FALSE 반환
