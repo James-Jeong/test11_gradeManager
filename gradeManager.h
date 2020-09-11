@@ -19,7 +19,10 @@ enum COMPARE_TYPE
 	GT		// 크다. (Greater Than)
 };
 
-/* 점수에 따른 등급을 판단하기 위한 등급 관련 데이터를 저장하는 구조체 */
+/**
+ * @struct gradeInfo_t
+ * @brief 점수에 따른 등급을 판단하기 위한 등급 관련 데이터를 저장하는 구조체
+ */
 typedef struct gradeInfo_s gradeInfo_t;
 struct gradeInfo_s
 {
@@ -31,7 +34,10 @@ struct gradeInfo_s
 	int max;
 };
 
-/* 지정한 점수에 대한 등급 A ~ D 까지의 정보를 관리하고, 등급 전체 범위와 ini 파일에 대한 정보를 관리하는 구조체 */
+/**
+ * @struct gradeManager_t
+ * @brief 지정한 점수에 대한 등급 A ~ D 까지의 정보를 관리하고, 등급 전체 범위와 ini 파일에 대한 정보를 관리하는 구조체
+ */
 typedef struct gradeManager_s gradeManager_t;
 struct gradeManager_s
 {
@@ -52,7 +58,7 @@ struct gradeManager_s
 };
 
 //////////////////////////////////////////////////////////////////////////
-/// Local Functions for gradeManager_t
+/// Public Functions for gradeManager_t
 //////////////////////////////////////////////////////////////////////////
 
 gradeManager_t* gradeManagerNew(const char *fileName);

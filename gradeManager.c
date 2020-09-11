@@ -11,7 +11,7 @@ static int compareNumbers(const char *valueName1, int value1, const char *valueN
 //////////////////////////////////////////////////////////////////////////
 
 static int gradeManagerCheckGrade(const gradeManager_t *gradeManager, char grade, int score);
-static char gradeManagerGetGradeFromNumber(gradeManager_t *gradeManager, int score);
+static char gradeManagerGetGradeFromNumber(const gradeManager_t *gradeManager, int score);
 static const gradeInfo_t* gradeManagerGetGradeInfo(const gradeManager_t *gradeManager, char grade);
 static int gradeManagerLoadINI(gradeManager_t *gradeManager, const char *fileName);
 static int gradeManagerSetGradeInfo(gradeManager_t *gradeManager, char grade, int min, int max);
@@ -44,14 +44,14 @@ static void gradeInfoSetData(gradeInfo_t *info, char grade, int min, int max)
 }
 
 //////////////////////////////////////////////////////////////////////////
-/// Local Functions for gradeManager_t
+/// Public Functions for gradeManager_t
 //////////////////////////////////////////////////////////////////////////
 
 /**
  * @fn gradeManager_t* gradeManagerNew(const char *fileName)
  * @brief 지정한 점수에 대한 등급 정보를 관리하기 위한 구조체 객체를 새로 생성하는 함수
  * 외부에서 접근할 수 있는 함수이므로 생성된 구조체 포인터에 대한 NULL 체크를 수행한다.
- * @param fileName 등급 정보를 관리하는 ini 파일 이름(입력, 읽기 전용)
+ * @param fileName 점수에 대한 등급 정보를 가지고 있는 ini 파일의 이름(입력, 읽기 전용)
  * @return 새로 생성된 gradeManager_t 구조체 객체 반환
  */
 gradeManager_t* gradeManagerNew(const char *fileName)
@@ -146,14 +146,14 @@ void gradeManagerEvaluateGrade(gradeManager_t *gradeManager, const int *scores, 
 //////////////////////////////////////////////////////////////////////////
 
 /**
- * @fn static char gradeManagerGetGradeFromNumber(gradeManager_t *gradeManager, int score)
+ * @fn static char gradeManagerGetGradeFromNumber(const gradeManager_t *gradeManager, int score)
  * @brief 지정한 점수로 등급을 결정하는 함수
  * gradeManagerEvaluateGrade 함수에서 호출되기 때문에 전달받은 구조체 포인터에 대한 NULL 체크를 수행하지 않는다.
- * @param gradeManager 등급 정보를 관리하는 구조체(입력)
+ * @param gradeManager 등급 정보를 관리하는 구조체(입력, 읽기 전용)
  * @param score 등급 판단에 사용될 점수(입력)
  * @return 성공 시 결정된 등급 문자, 실패 시 'F' 문자, 지정한 점수가 등급 전체 범위에 포함되지 않을 때 '?' 문자 반환
  */
-static char gradeManagerGetGradeFromNumber(gradeManager_t *gradeManager, int score)
+static char gradeManagerGetGradeFromNumber(const gradeManager_t *gradeManager, int score)
 {
 	if(score < gradeManager->totalMin || score > gradeManager->totalMax)
 	{
@@ -327,7 +327,7 @@ static int gradeManagerSetGradeInfo(gradeManager_t *gradeManager, char grade, in
  * @fn static int gradeManagerGetValueFromINI(const gradeManager_t *gradeManager, const char *field, const char *key, int defaultValue, const char *fileName)
  * @brief iniManager 로 부터 지정한 필드와 키에 해당하는 값을 반환하는 함수
  * gradeManagerLoadINI 함수에서 호출되기 때문에 전달받은 구조체 포인터와 필드, 키, 파일 이름에 대한 NULL 체크를 수행하지 않는다.
- * @param gradeManager 등급 정보를 저장할 구조체(입력, 읽기 전용)
+ * @param gradeManager 등급 정보를 관리하는 구조체(입력, 읽기 전용)
  * @param field 키를 찾기 위한 필드 이름(입력, 읽기 전용)
  * @param key 값을 찾기 위한 키 이름(입력, 읽기 전용)
  * @param defaultValue 찾고자 하는 키에 대한 값이 존재하지 않을 때 반환될 값(입력)
@@ -351,11 +351,11 @@ static int gradeManagerGetValueFromINI(const gradeManager_t *gradeManager, const
  * @fn static int compareNumbers(const char *valueName1, int value1, const char *valueName2, int value2, int type)
  * @brief 두 개의 숫자를 비교 유형에 따라 비교하는 함수
  * gradeManagerLoadINI 함수에서 호출되기 때문에 전달받은 문자열들에 대한 NULL 체크를 수행하지 않는다.
- * @param field1 비교 결과가 거짓일 때 출력할 왼쪽 피연산자의 필드와 키 이름
- * @param value1 왼쪽 피연산자 값
- * @param field2 비교 결과가 거짓일 때 출력할 오른쪽 피연산자의 필드와 키 이름
- * @param value2 오른쪽 피연산자 값
- * @param type 숫자 비교 유형 (gradeManager.h 의 숫자 비교 유형 열거형 참조)
+ * @param field1 비교 결과가 거짓일 때 출력할 왼쪽 피연산자의 필드와 키 이름(입력, 읽기 전용)
+ * @param value1 왼쪽 피연산자 값(입력)
+ * @param field2 비교 결과가 거짓일 때 출력할 오른쪽 피연산자의 필드와 키 이름(입력, 읽기 전용)
+ * @param value2 오른쪽 피연산자 값(입력)
+ * @param type 숫자 비교 유형(입력, gradeManager.h 의 숫자 비교 유형 열거형 참조)
  * @return 성공 시 TRUE, 실패 시 FALSE 반환
  */
 static int compareNumbers(const char *valueName1, int value1, const char *valueName2, int value2, int type)
