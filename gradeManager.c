@@ -10,9 +10,9 @@ static int compareNumbers(const char *valueName1, int value1, const char *valueN
 /// Predefinitions of Static Functions
 //////////////////////////////////////////////////////////////////////////
 
-static int gradeManagerCheckGrade(gradeManager_t *gradeManager, char grade, int score);
+static int gradeManagerCheckGrade(const gradeManager_t *gradeManager, char grade, int score);
 static char gradeManagerGetGradeFromNumber(gradeManager_t *gradeManager, int score);
-static gradeInfo_t* gradeManagerGetInfoFromGrade(gradeManager_t *gradeManager, char grade);
+static const gradeInfo_t* gradeManagerGetGradeInfo(const gradeManager_t *gradeManager, char grade);
 static int gradeManagerLoadINI(gradeManager_t *gradeManager, const char *fileName);
 static int gradeManagerSetGradeInfo(gradeManager_t *gradeManager, char grade, int min, int max);
 static int gradeManagerGetValueFromINI(const gradeManager_t *gradeManager, const char *field, const char *key, int defaultValue, const char *fileName);
@@ -23,8 +23,8 @@ static int gradeManagerGetValueFromINI(const gradeManager_t *gradeManager, const
 
 /**
  * @fn static void gradeInfoSetData(gradeInfo_t *info, char grade, int min, int max)
- * @brief 등급에 대한 정보를 저장하는 함수
- * @param info 등급에 대한 정보를 저장할 gradeInfo_t 객체(출력)
+ * @brief 등급 정보를 저장하는 함수
+ * @param info 등급 정보를 저장할 gradeInfo_t 객체(출력)
  * @param grade 정보를 저장할 등급 문자(입력)
  * @param min 지정한 점수에 대한 등급을 판단하기 위한 범위 최소값(입력)
  * @param max 지정한 점수에 대한 등급을 판단하기 위한 범위 최대값(입력)
@@ -51,7 +51,7 @@ static void gradeInfoSetData(gradeInfo_t *info, char grade, int min, int max)
  * @fn gradeManager_t* gradeManagerNew(const char *fileName)
  * @brief 지정한 점수에 대한 등급 정보를 관리하기 위한 구조체 객체를 새로 생성하는 함수
  * 외부에서 접근할 수 있는 함수이므로 생성된 구조체 포인터에 대한 NULL 체크를 수행한다.
- * @param fileName 등급에 대한 정보를 관리하는 ini 파일 이름(입력, 읽기 전용)
+ * @param fileName 등급 정보를 관리하는 ini 파일 이름(입력, 읽기 전용)
  * @return 새로 생성된 gradeManager_t 구조체 객체 반환
  */
 gradeManager_t* gradeManagerNew(const char *fileName)
@@ -69,6 +69,7 @@ gradeManager_t* gradeManagerNew(const char *fileName)
 		return NULL;
 	}
 
+	gradeManager->iniManager = NULL;
 	if(gradeManagerLoadINI(gradeManager, fileName) == FAIL)
 	{
 		printf("[로딩 실패]\n\n");
@@ -107,7 +108,7 @@ void gradeManagerDelete(gradeManager_t **gradeManager)
  * @fn void gradeManagerEvaluateGrade(gradeManager_t *gradeManager, const int *scores, int size)
  * @brief 지정한 점수에 대한 등급을 판단하는 함수
  * 외부에서 접근할 수 있는 함수이므로 전달받은 구조체 포인터에 대한 NULL 체크를 수행한다.
- * @param gradeManager 등급에 대한 정보를 관리하는 구조체(입력)
+ * @param gradeManager 등급 정보를 관리하는 구조체(입력)
  * @param scores 등급 판단을 위한 점수들을 담은 정수 배열(입력, 읽기 전용)
  * @param size 정수 배열의 전체 크기(입력)
  * @return 반환값 없음
@@ -148,7 +149,7 @@ void gradeManagerEvaluateGrade(gradeManager_t *gradeManager, const int *scores, 
  * @fn static char gradeManagerGetGradeFromNumber(gradeManager_t *gradeManager, int score)
  * @brief 지정한 점수로 등급을 결정하는 함수
  * gradeManagerEvaluateGrade 함수에서 호출되기 때문에 전달받은 구조체 포인터에 대한 NULL 체크를 수행하지 않는다.
- * @param gradeManager 등급에 대한 정보를 관리하는 구조체(입력)
+ * @param gradeManager 등급 정보를 관리하는 구조체(입력)
  * @param score 등급 판단에 사용될 점수(입력)
  * @return 성공 시 결정된 등급 문자, 실패 시 'F' 문자, 지정한 점수가 등급 전체 범위에 포함되지 않을 때 '?' 문자 반환
  */
@@ -156,7 +157,7 @@ static char gradeManagerGetGradeFromNumber(gradeManager_t *gradeManager, int sco
 {
 	if(score < gradeManager->totalMin || score > gradeManager->totalMax)
 	{
-		printf("\n[ERROR] 입력받은 점수에 대한 등급을 판단할 수 없음 .\n");
+		printf("\n[ERROR] 입력받은 점수에 대한 등급을 판단할 수 없음.\n");
 		return '?';
 	}
 
@@ -169,17 +170,17 @@ static char gradeManagerGetGradeFromNumber(gradeManager_t *gradeManager, int sco
 }
 
 /**
- * @fn static int gradeManagerCheckGrade(gradeManager_t *gradeManager, char grade, int score)
+ * @fn static int gradeManagerCheckGrade(const gradeManager_t *gradeManager, char grade, int score)
  * @brief 지정한 점수에 대해 등급을 판단하는 함수
  * gradeManagerGetGradeFromNumber 함수에서 호출되기 때문에 전달받은 구조체 포인터에 대한 NULL 체크를 수행하지 않는다.
- * @param gradeManager 등급에 대한 정보를 관리하는 구조체(입력)
+ * @param gradeManager 등급 정보를 관리하는 구조체(입력)
  * @param grade 판단할 등급 문자(입력)
  * @param score 등급 판단에 사용될 점수(입력)
  * @return 성공 시 TRUE, 실패 시 FALSE 반환
  */
-static int gradeManagerCheckGrade(gradeManager_t *gradeManager, char grade, int score)
+static int gradeManagerCheckGrade(const gradeManager_t *gradeManager, char grade, int score)
 {
-	gradeInfo_t *gradeInfo = gradeManagerGetInfoFromGrade(gradeManager, grade);
+	const gradeInfo_t *gradeInfo = gradeManagerGetGradeInfo(gradeManager, grade);
 	if(gradeInfo == NULL)
 	{
 		printf("[DEBUG] 입력받은 등급에 대한 정보(min, max)가 없음.\n");
@@ -189,14 +190,14 @@ static int gradeManagerCheckGrade(gradeManager_t *gradeManager, char grade, int 
 }
 
 /**
- * @fn static gradeInfo_t* gradeManagerGetInfoFromGrade(gradeManager_t *gradeManager, char grade)
- * @brief 등급에 대한 정보를 가지고 있는 구조체(gradeInfo_t)를 반환하기 위한 함수
+ * @fn static const gradeInfo_t* gradeManagerGetGradeInfo(const gradeManager_t *gradeManager, char grade)
+ * @brief 지정한 등급에 대해, 등급 정보를 관리하는 구조체(gradeManager_t)에 속한 gradeInfo_t 구조체를 반환하기 위한 함수
  * gradeManagerCheckGrade 함수에서 호출되기 때문에 전달받은 구조체 포인터에 대한 NULL 체크를 수행하지 않는다.
- * @param gradeManager 등급에 대한 정보를 관리하는 구조체(입력)
- * @param grade 반환 시 식별에 필요한 등급 문자(입력)
- * @return 성공 시 지정한 등급에 대한 정보를 가지는 gradeInfo_t 구조체의 주소, 실패 시 NULL 반환
+ * @param gradeManager 등급 정보를 관리하는 구조체(입력)
+ * @param grade 등급 정보 식별에 필요한 등급 문자(입력)
+ * @return 성공 시 지정한 등급 정보를 가지는 gradeInfo_t 구조체의 주소, 실패 시 NULL 반환
  */
-static gradeInfo_t* gradeManagerGetInfoFromGrade(gradeManager_t *gradeManager, char grade)
+static const gradeInfo_t* gradeManagerGetGradeInfo(const gradeManager_t *gradeManager, char grade)
 {
 	if(gradeManager->gradeA.grade == grade)
 	{
@@ -220,10 +221,10 @@ static gradeInfo_t* gradeManagerGetInfoFromGrade(gradeManager_t *gradeManager, c
 
 /**
  * @fn static int gradeManagerLoadINI(gradeManager_t *gradeManager, const char *fileName)
- * @brief ini 파일에 대한 정보를 gradeManager 구조체에 저장하는 함수
+ * @brief 지정한 ini 파일에 대한 정보를 gradeManager_t 구조체에 저장하는 함수
  * gradeManagerNew 함수에서 호출되기 때문에 전달받은 구조체 포인터와 파일 이름에 대한 NULL 체크를 수행하지 않는다.
- * @param gradeManager 등급에 대한 정보를 관리하는 구조체(입력 및 출력)
- * @param fileName 등급에 대한 정보를 관리하는 ini 파일 이름(입력, 읽기 전용)
+ * @param gradeManager 등급 정보를 관리하는 구조체(입력 및 출력)
+ * @param fileName 등급 정보를 관리하는 ini 파일 이름(입력, 읽기 전용)
  * @return 성공 시 SUCCESS, 실패 시 FAIL 반환
  */
 static int gradeManagerLoadINI(gradeManager_t *gradeManager, const char *fileName)
@@ -291,9 +292,9 @@ static int gradeManagerLoadINI(gradeManager_t *gradeManager, const char *fileNam
 
 /**
  * @fn static int gradeManagerSetGradeInfo(gradeManager_t *gradeManager, char grade, int min, int max)
- * @brief 등급에 대한 정보를 gradeManager 에 저장하기 위한 함수
+ * @brief 등급 정보를 gradeManager 에 저장하기 위한 함수
  * gradeManagerLoadINI 함수에서 호출되기 때문에 전달받은 구조체 포인터에 대한 NULL 체크를 수행하지 않는다.
- * @param gradeManager 등급에 대한 정보를 저장할 구조체(출력)
+ * @param gradeManager 등급 정보를 저장할 구조체(출력)
  * @param grade 정보를 저장할 등급 문자(입력)
  * @param min 지정한 점수에 대한 등급을 판단하기 위한 범위 최소값(입력)
  * @param max 지정한 점수에 대한 등급을 판단하기 위한 범위 최대값(입력)
@@ -304,16 +305,16 @@ static int gradeManagerSetGradeInfo(gradeManager_t *gradeManager, char grade, in
 	switch(grade)
 	{
 		case 'A':
-			gradeInfoSetData(&gradeManager->gradeA, grade, min, max);
+			gradeInfoSetData(&(gradeManager->gradeA), grade, min, max);
 			break;
 		case 'B':
-			gradeInfoSetData(&gradeManager->gradeB, grade, min, max);
+			gradeInfoSetData(&(gradeManager->gradeB), grade, min, max);
 			break;
 		case 'C':
-			gradeInfoSetData(&gradeManager->gradeC, grade, min, max);
+			gradeInfoSetData(&(gradeManager->gradeC), grade, min, max);
 			break;
 		case 'D':
-			gradeInfoSetData(&gradeManager->gradeD, grade, min, max);
+			gradeInfoSetData(&(gradeManager->gradeD), grade, min, max);
 			break;
 		default:
 			return FAIL;
@@ -326,12 +327,12 @@ static int gradeManagerSetGradeInfo(gradeManager_t *gradeManager, char grade, in
  * @fn static int gradeManagerGetValueFromINI(const gradeManager_t *gradeManager, const char *field, const char *key, int defaultValue, const char *fileName)
  * @brief iniManager 로 부터 지정한 필드와 키에 해당하는 값을 반환하는 함수
  * gradeManagerLoadINI 함수에서 호출되기 때문에 전달받은 구조체 포인터와 필드, 키, 파일 이름에 대한 NULL 체크를 수행하지 않는다.
- * @param gradeManager 등급에 대한 정보를 저장할 구조체(입력, 읽기 전용)
+ * @param gradeManager 등급 정보를 저장할 구조체(입력, 읽기 전용)
  * @param field 키를 찾기 위한 필드 이름(입력, 읽기 전용)
  * @param key 값을 찾기 위한 키 이름(입력, 읽기 전용)
  * @param defaultValue 찾고자 하는 키에 대한 값이 존재하지 않을 때 반환될 값(입력)
- * @param fileName 등급에 대한 정보를 가지는 ini 파일 이름(입력, 읽기 전용)
- * @return 성공 시 SUCCESS, 실패 시 FAIL 반환
+ * @param fileName 등급 정보를 가지는 ini 파일 이름(입력, 읽기 전용)
+ * @return 성공 시 지정한 필드에 대한 키의 값, 실패 시 FAIL 반환
  */
 static int gradeManagerGetValueFromINI(const gradeManager_t *gradeManager, const char *field, const char *key, int defaultValue, const char *fileName)
 {
@@ -349,11 +350,12 @@ static int gradeManagerGetValueFromINI(const gradeManager_t *gradeManager, const
 /**
  * @fn static int compareNumbers(const char *valueName1, int value1, const char *valueName2, int value2, int type)
  * @brief 두 개의 숫자를 비교 유형에 따라 비교하는 함수
- * gradeManagerLoadINI 함수에서 호출되기 때문에 전달받은 문자열에 대한 NULL 체크를 수행하지 않는다.
+ * gradeManagerLoadINI 함수에서 호출되기 때문에 전달받은 문자열들에 대한 NULL 체크를 수행하지 않는다.
  * @param field1 비교 결과가 거짓일 때 출력할 왼쪽 피연산자의 필드와 키 이름
  * @param value1 왼쪽 피연산자 값
  * @param field2 비교 결과가 거짓일 때 출력할 오른쪽 피연산자의 필드와 키 이름
  * @param value2 오른쪽 피연산자 값
+ * @param type 숫자 비교 유형 (gradeManager.h 의 숫자 비교 유형 열거형 참조)
  * @return 성공 시 TRUE, 실패 시 FALSE 반환
  */
 static int compareNumbers(const char *valueName1, int value1, const char *valueName2, int value2, int type)
@@ -370,10 +372,11 @@ static int compareNumbers(const char *valueName1, int value1, const char *valueN
 	}
 	else
 	{
-		printf("알 수 없는 숫자 비교 유형.\n");
+		printf("[DEBUG] 알 수 없는 숫자 비교 유형.\n");
 		return FALSE;
 	}
 
-	if(result == FALSE) printf("잘못된 범위 (%s:%d, %s:%d)\n", valueName1, value1, valueName2, value2);
+	if(result == FALSE) printf("[ERROR] 잘못된 범위 (%s:%d, %s:%d)\n", valueName1, value1, valueName2, value2);
 	return result;
 }
+
