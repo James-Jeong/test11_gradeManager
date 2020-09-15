@@ -330,6 +330,9 @@ static void iniFieldDelete(iniField_t **field)
 				((*field)->keyList)[keyIndex] = NULL;
 			}
 		}
+
+		free((*field)->keyList);
+		(*field)->keyList = NULL;
 	}
 
 	free(*field);
