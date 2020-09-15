@@ -108,7 +108,10 @@ void iniManagerDelete(iniManager_t **iniManager)
 		int fieldIndex = 0;
 		for( ; fieldIndex < (*iniManager)->fieldMaxNum; fieldIndex++)
 		{
-			iniFieldDelete(&((*iniManager)->fieldList[fieldIndex]));
+			if((*iniManager)->fieldList[fieldIndex] != NULL)
+			{
+				iniFieldDelete(&((*iniManager)->fieldList[fieldIndex]));
+			}
 		}
 
 		free((*iniManager)->fieldList);
@@ -221,12 +224,6 @@ static iniKey_t* iniKeyNew(const char *fieldName, const char *keyName)
  */
 static void iniKeyDelete(iniKey_t **key)
 {
-	if(*key == NULL)
-	{
-		printf("[DEBUG] iniKey 해제 실패. 객체가 NULL.\n");
-		return;
-	}
-
 	free(*key);
 	*key = NULL;
 }
@@ -308,17 +305,12 @@ static iniField_t* iniFieldNew(const char *fieldName, int keyMaxNum)
 /**
  * @fn static void iniFieldDelete(iniField_t **field)
  * @brief 생성된 iniField_t 구조체 객체의 메모리를 해제하는 함수
+ * iniManagerDelete 함수에서 호출되기 때문에 전달받은 구조체 포인터에 대한 NULL 체크를 수행하지 않는다.
  * @param field 삭제할 iniField_t 구조체 객체(입력, 이중 포인터)
  * @return 반환값 없음
  */
 static void iniFieldDelete(iniField_t **field)
 {
-	if(*field == NULL)
-	{
-		printf("[DEBUG] iniField 해제 실패. 객체가 NULL.\n");
-		return;
-	}
-
 	if((*field)->keyList != NULL)
 	{
 		int keyIndex = 0;
