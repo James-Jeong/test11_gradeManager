@@ -65,7 +65,7 @@ gradeManager_t* gradeManagerNew(const char *fileName)
 	gradeManager_t *gradeManager = (gradeManager_t*)malloc(sizeof(gradeManager_t));
 	if(gradeManager == NULL)
 	{
-		printf("[DEBUG] 등급 임계치 객체 동적 생성 실패. NULL.\n");
+		printf("[DEBUG] gradeManager 객체 동적 생성 실패. NULL.\n");
 		return NULL;
 	}
 
@@ -247,6 +247,7 @@ static int gradeManagerLoadINI(gradeManager_t *gradeManager, const char *fileNam
 
 	int minA = gradeManagerGetValueFromINI(gradeManager, "[A]", "min", 90, fileName);
 	if(minA == FAIL) return FAIL;
+	if(compareNumbers("A min", minA, "Total min", totalMin, GT) == FAIL) return FAIL;
 
 	int maxA = gradeManagerGetValueFromINI(gradeManager, "[A]", "max", 100, fileName);
 	if(maxA == FAIL) return FAIL;
@@ -256,6 +257,7 @@ static int gradeManagerLoadINI(gradeManager_t *gradeManager, const char *fileNam
 	int minB = gradeManagerGetValueFromINI(gradeManager, "[B]", "min", 80, fileName);
 	if(minB == FAIL) return FAIL;
 	if(compareNumbers("B min", minB, "A min", minA, LT) == FAIL) return FAIL;
+	if(compareNumbers("B min", minB, "Total min", totalMin, GT) == FAIL) return FAIL;
 
 	int maxB = gradeManagerGetValueFromINI(gradeManager, "[B]", "max", 89, fileName);
 	if(maxB == FAIL) return FAIL;
@@ -265,6 +267,7 @@ static int gradeManagerLoadINI(gradeManager_t *gradeManager, const char *fileNam
 	int minC = gradeManagerGetValueFromINI(gradeManager, "[C]", "min", 70, fileName);
 	if(minC == FAIL) return FAIL;
 	if(compareNumbers("C min", minC, "B min", minB, LT) == FAIL) return FAIL;
+	if(compareNumbers("C min", minC, "Total min", totalMin, GT) == FAIL) return FAIL;
 
 	int maxC = gradeManagerGetValueFromINI(gradeManager, "[C]", "max", 79, fileName);
 	if(maxC == FAIL) return FAIL;
