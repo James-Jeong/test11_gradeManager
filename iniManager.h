@@ -46,6 +46,7 @@ struct iniField_s
 {
 	// 필드 이름
 	char name[MAX_FIELD_LEN];
+	// 필드가 가지고 있는 키의 전체 개수
 	int keyMaxNum;
 	// 해당 필드에 대한 키와 키에 대한 값을 저장
 	iniKey_t **keyList;
@@ -61,8 +62,9 @@ struct iniField_s
 typedef struct iniManager_s iniManager_t;
 struct iniManager_s
 {
-	// 필드 전체 개수
+	// iniManager 가 가지고 있는 필드 전체 개수
 	int fieldMaxNum;
+	// ini 파일에 있는 필드에 대한 모든 정보 관리
 	iniField_t **fieldList;
 };
 
